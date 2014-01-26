@@ -74,21 +74,23 @@
     /////////////////////////////////////////////////////////////////////////////
     //
     // Reset handler
-  // The CPU will start executing here after a reset
+    // The CPU will start executing here after a reset
     //
     /////////////////////////////////////////////////////////////////////////////
     cmu_base_addr:
         .long CMU_BASE
+    gpio_pa_base_addr:
+        .long GPIO_PA_BASE
 
           .globl  _reset
           .type   _reset, %function
         .thumb_func
 _reset:
+    /* GPIO CLOCK */
     ldr r1, cmu_base_addr //Load CMU base adress
     ldr r2, [r1, #CMU_HFPERCLKEN0] //Load current value of HFPERCLK_ENABLE
 
-    //Set GPIO clock
-    mov r3, #1
+    mov r3, #1 //Set GPIO clock
     lsl r3, r3, #CMU_HFPERCLKEN0_GPIO
 
     orr r2, r2, r3
@@ -96,12 +98,26 @@ _reset:
     //store new value
     str r2, [r1, #CMU_HFPERCLKEN0]
 
+    /* GPIO Ports */
+    //Set high drive strength
+    ldr r1, gpio_pa_base_addr //Load CMU base adress
+    mov r2, #0x2
+    //store new value
+    str r2, [r1, #GPIO_CTRL]
+
+    //Set pins 8-15 to output
+    mov r2, #0x55555555
+    str r2, [r1, #GPIO_MODEH]
+
+    //Set pin 9 to high
+    mov r2, #0x200
+    str r2, [r1, #GPIO_DOUT]
           b .  // do nothing
 
     /////////////////////////////////////////////////////////////////////////////
     //
-  // GPIO handler
-  // The CPU will jump here when there is a GPIO interrupt
+    // GPIO handler
+    // The CPU will jump here when there is a GPIO interrupt
     //
     /////////////////////////////////////////////////////////////////////////////
 
