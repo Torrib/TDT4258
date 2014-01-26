@@ -126,18 +126,20 @@ _reset:
     str r3, [r2, #GPIO_DOUT]
 
     //Status of pins 0-7 can now be found by reading GPIO PC DIN
-    ldr r3, [r2, #GPIO_DIN]
+    //ldr r3, [r2, #GPIO_DIN]
+    mov r5, #0xFF00
+    mov r3, r5
     b buttons_loop
 
     b .  // do nothing
 
 buttons_loop:
     //Read button 1 and store in r3
-    ldr r4, [r2, #GPIO_DIN]
-    eor r3, r3, r4
-    lsl r4, r3, #8
-    str r4, [r1, #GPIO_DOUT]
-
+    ldr r4, [r2, #GPIO_DIN] //Input til r4
+    lsl r4, r4, #8 //Left shift input 8bits
+    eor r3, r3, r5
+    eor r3, r3, r4 //XOR input med tidligere inputer
+    str r3, [r1, #GPIO_DOUT] //Sett til ouput
 
     b buttons_loop
 
