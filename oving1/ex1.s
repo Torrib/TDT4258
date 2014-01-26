@@ -81,6 +81,8 @@
         .long CMU_BASE
     gpio_pa_base_addr:
         .long GPIO_PA_BASE
+    gpio_pc_base_addr:
+        .long GPIO_PC_BASE
 
           .globl  _reset
           .type   _reset, %function
@@ -98,7 +100,7 @@ _reset:
     //store new value
     str r2, [r1, #CMU_HFPERCLKEN0]
 
-    /* GPIO Ports */
+    /* GPIO Output */
     //Set high drive strength
     ldr r1, gpio_pa_base_addr //Load CMU base adress
     mov r2, #0x2
@@ -112,7 +114,32 @@ _reset:
     //Set pin 9 to high
     mov r2, #0xFE00
     str r2, [r1, #GPIO_DOUT]
-          b .  // do nothing
+
+    /* GPIO Input */
+    //Set 0-7 to input
+    ldr r2, gpio_pc_base_addr
+    mov r3, #0x33333333
+    str r3, [r2, #GPIO_MODEL]
+
+    //Enable internal pull-up
+    mov r3, #0xFF
+    str r3, [r2, #GPIO_DOUT]
+
+    //Status of pins 0-7 can now be found by reading GPIO PC DIN
+    ldr r3, [r2, #GPIO_DIN]
+    b buttons_loop
+
+    b .  // do nothing
+
+buttons_loop:
+    //Read button 1 and store in r3
+    ldr r4, [r2, #GPIO_DIN]
+    eor r3, r3, r4
+    lsl r4, r3, #8
+    str r4, [r1, #GPIO_DOUT]
+
+
+    b buttons_loop
 
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -124,10 +151,10 @@ _reset:
         .thumb_func
 gpio_handler:
 
-          b .  // do nothing
+    b .  // do nothing
 
     /////////////////////////////////////////////////////////////////////////////
 
         .thumb_func
 dummy_handler:
-        b .  // do nothing
+    b .  // do nothing
