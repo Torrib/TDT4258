@@ -1,6 +1,6 @@
-        .syntax unified
+.syntax unified
 
-          .include "efm32gg.s"
+.include "efm32gg.s"
 
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -9,67 +9,67 @@
     //
     /////////////////////////////////////////////////////////////////////////////
 
-        .section .vectors
+.section .vectors
 
-          .long   stack_top               /* Top of Stack                 */
-          .long   _reset                  /* Reset Handler                */
-          .long   dummy_handler           /* NMI Handler                  */
-          .long   dummy_handler           /* Hard Fault Handler           */
-          .long   dummy_handler           /* MPU Fault Handler            */
-          .long   dummy_handler           /* Bus Fault Handler            */
-          .long   dummy_handler           /* Usage Fault Handler          */
-          .long   dummy_handler           /* Reserved                     */
-          .long   dummy_handler           /* Reserved                     */
-          .long   dummy_handler           /* Reserved                     */
-          .long   dummy_handler           /* Reserved                     */
-          .long   dummy_handler           /* SVCall Handler               */
-          .long   dummy_handler           /* Debug Monitor Handler        */
-          .long   dummy_handler           /* Reserved                     */
-          .long   dummy_handler           /* PendSV Handler               */
-          .long   dummy_handler           /* SysTick Handler              */
+    .long   stack_top               /* Top of Stack                 */
+    .long   _reset                  /* Reset Handler                */
+    .long   dummy_handler           /* NMI Handler                  */
+    .long   dummy_handler           /* Hard Fault Handler           */
+    .long   dummy_handler           /* MPU Fault Handler            */
+    .long   dummy_handler           /* Bus Fault Handler            */
+    .long   dummy_handler           /* Usage Fault Handler          */
+    .long   dummy_handler           /* Reserved                     */
+    .long   dummy_handler           /* Reserved                     */
+    .long   dummy_handler           /* Reserved                     */
+    .long   dummy_handler           /* Reserved                     */
+    .long   dummy_handler           /* SVCall Handler               */
+    .long   dummy_handler           /* Debug Monitor Handler        */
+    .long   dummy_handler           /* Reserved                     */
+    .long   dummy_handler           /* PendSV Handler               */
+    .long   dummy_handler           /* SysTick Handler              */
 
-          /* External Interrupts */
-          .long   dummy_handler
-          .long   gpio_handler            /* GPIO even handler */
-          .long   dummy_handler
-          .long   dummy_handler
-          .long   dummy_handler
-          .long   dummy_handler
-          .long   dummy_handler
-          .long   dummy_handler
-          .long   dummy_handler
-          .long   dummy_handler
-          .long   dummy_handler
-          .long   gpio_handler            /* GPIO odd handler */
-          .long   dummy_handler
-          .long   dummy_handler
-          .long   dummy_handler
-          .long   dummy_handler
-          .long   dummy_handler
-          .long   dummy_handler
-          .long   dummy_handler
-          .long   dummy_handler
-          .long   dummy_handler
-          .long   dummy_handler
-          .long   dummy_handler
-          .long   dummy_handler
-          .long   dummy_handler
-          .long   dummy_handler
-          .long   dummy_handler
-          .long   dummy_handler
-          .long   dummy_handler
-          .long   dummy_handler
-          .long   dummy_handler
-          .long   dummy_handler
-          .long   dummy_handler
-          .long   dummy_handler
-          .long   dummy_handler
-          .long   dummy_handler
-          .long   dummy_handler
-          .long   dummy_handler
-          .long   dummy_handler
+    /* External Interrupts */
+    .long   dummy_handler
+    .long   gpio_handler            /* GPIO even handler */
+    .long   dummy_handler
+    .long   dummy_handler
+    .long   dummy_handler
+    .long   dummy_handler
+    .long   dummy_handler
+    .long   dummy_handler
+    .long   dummy_handler
+    .long   dummy_handler
+    .long   dummy_handler
+    .long   gpio_handler            /* GPIO odd handler */
+    .long   dummy_handler
+    .long   dummy_handler
+    .long   dummy_handler
+    .long   dummy_handler
+    .long   dummy_handler
+    .long   dummy_handler
+    .long   dummy_handler
+    .long   dummy_handler
+    .long   dummy_handler
+    .long   dummy_handler
+    .long   dummy_handler
+    .long   dummy_handler
+    .long   dummy_handler
+    .long   dummy_handler
+    .long   dummy_handler
+    .long   dummy_handler
+    .long   dummy_handler
+    .long   dummy_handler
+    .long   dummy_handler
+    .long   dummy_handler
+    .long   dummy_handler
+    .long   dummy_handler
+    .long   dummy_handler
+    .long   dummy_handler
+    .long   dummy_handler
+    .long   dummy_handler
+    .long   dummy_handler
 
-          .section .text
+.section .text
 
     /////////////////////////////////////////////////////////////////////////////
     //
@@ -84,9 +84,9 @@
     gpio_pc_base_addr:
         .long GPIO_PC_BASE
 
-          .globl  _reset
-          .type   _reset, %function
-        .thumb_func
+    .globl  _reset
+    .type   _reset, %function
+    .thumb_func
 _reset:
     /* GPIO CLOCK */
     ldr r1, cmu_base_addr //Load CMU base adress
@@ -131,6 +131,7 @@ _reset:
 
     b .  // do nothing
 
+    .thumb_func
 buttons_loop:
     //Read button 1 and store in r3
     ldr r4, [r2, #GPIO_DIN]
@@ -147,14 +148,12 @@ buttons_loop:
     // The CPU will jump here when there is a GPIO interrupt
     //
     /////////////////////////////////////////////////////////////////////////////
-
-        .thumb_func
+   .thumb_func
 gpio_handler:
 
     b .  // do nothing
 
     /////////////////////////////////////////////////////////////////////////////
-
-        .thumb_func
+   .thumb_func
 dummy_handler:
     b .  // do nothing
