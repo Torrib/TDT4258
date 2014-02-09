@@ -3,9 +3,9 @@
 % Assignment title
 \newcommand{\hmwkTitle}{Exercise\ \#1} 
 % Due date
-\newcommand{\hmwkDueDate}{Wednesday,\  February 12,\ 2014} 
+\newcommand{\hmwkDueDate}{Monday,\  February 10,\ 2014} 
 % Course/class
-\newcommand{\hmwkClass}{TDT4258 Artificial Intelligence Methods}
+\newcommand{\hmwkClass}{TDT4258: Energy Efficient Computer Design}
 
 \begin{document}
 
@@ -25,9 +25,27 @@
 %   ASSIGNMENTS
 %----------------------------------------------------------------------------------------
 
+
+
 \begin{homeworkProblem}
 
+\lstset{language={[x86masm]assembler}}
+\begin{lstlisting}
+    .text
+main:
+    # I'm going to output a string.
+    li $v0, 4
+    la $a0, mystr
+    syscall
 
+    # Bye!
+    li $v0, 10
+    syscall
+
+    .data
+mystr:
+    .asciiz "This is my string. All mine!\n"
+\end{lstlisting}
 \end{homeworkProblem}
 
 \begin{homeworkProblem}
