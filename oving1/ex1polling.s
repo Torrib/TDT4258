@@ -71,26 +71,22 @@
 
 .section .text
 
-/////////////////////////////////////////////////////////////////////////////
-//
-// Reset handler
-// The CPU will start executing here after a reset
-//
-/////////////////////////////////////////////////////////////////////////////
-cmu_base_addr:
-    .long CMU_BASE
-gpio_base_addr:
-	.long GPIO_BASE
-gpio_pa_base_addr:
-    .long GPIO_PA_BASE
-gpio_pc_base_addr:
-    .long GPIO_PC_BASE
-nvic_iser0:
-	.long ISER0
+    /////////////////////////////////////////////////////////////////////////////
+    //
+    // Reset handler
+    // The CPU will start executing here after a reset
+    //
+    /////////////////////////////////////////////////////////////////////////////
+    cmu_base_addr:
+        .long CMU_BASE
+    gpio_pa_base_addr:
+        .long GPIO_PA_BASE
+    gpio_pc_base_addr:
+        .long GPIO_PC_BASE
 
-.globl  _reset
-.type   _reset, %function
-.thumb_func
+    .globl  _reset
+    .type   _reset, %function
+    .thumb_func
 _reset:
     /* GPIO CLOCK */
     ldr r1, cmu_base_addr //Load CMU base adress
@@ -115,6 +111,10 @@ _reset:
     mov r2, #0x55555555
     str r2, [r1, #GPIO_MODEH]
 
+    //Set pin 9 to high
+    mov r2, #0xFE00
+    str r2, [r1, #GPIO_DOUT]
+
     /* GPIO Input */
     //Set 0-7 to input
     ldr r2, gpio_pc_base_addr
@@ -125,25 +125,20 @@ _reset:
     mov r3, #0xFF
     str r3, [r2, #GPIO_DOUT]
 
-    /* Set up interrupts */
-    ldr r0, gpio_base_addr
-    mov r4, #0x22222222
-    str r4, [r0, #GPIO_EXTIPSELL]
-
-    mov r4, #0xFF
-    str r4, [r0, #GPIO_EXTIRISE] //Activate on rise
-    //str r4, [r0, #GPIO_EXTIFALL] //Activate on fall 
-    str r4, [r0, #GPIO_IEN] //Enable interrupts generation
-    ldr r5, nvic_iser0
-    ldr r4, =#0x802
-    str r4, [r5] //Enable interrupt handling 
-
-	//Sets the pins 8-15 to 1
-    mov r5, #0xFF00 
+    //Status of pins 0-7 can now be found by reading GPIO PC DIN
+    //ldr r3, [r2, #GPIO_DIN]
+    mov r5, #0xFF00
     mov r3, r5
-    str r5, [r1, #GPIO_DOUT] //Sett til ouput
+    b buttons_loop
 
-<<<<<<< HEAD
+    .thumb_func
+buttons_loop:
+    ldr r4, [r2, #GPIO_DIN]
+    lsl r4, r4, #8 //Left shift input 8bits
+    mov r5, #0
+    eor r4, r4, r5
+    str r4, [r1, #GPIO_DOUT] //write back to lights
+
     b buttons_loop
 
     /////////////////////////////////////////////////////////////////////////////
@@ -154,36 +149,9 @@ _reset:
     /////////////////////////////////////////////////////////////////////////////
    .thumb_func
 gpio_handler:
-=======
-	wfi //Wait for interrupts
-
->>>>>>> 290265dde381886809f3ca4e2af11e32fc808612
     b .  // do nothing
 
-/////////////////////////////////////////////////////////////////////////////
-//
-// GPIO handler
-// The CPU will jump here when there is a GPIO interrupt
-//
-/////////////////////////////////////////////////////////////////////////////
-.thumb_func
-gpio_handler:
-    mov r4, #0xFF
-    str r4, [r0, #GPIO_IFC] //Clear interrupt
-	
-	//Light all the lights!
-    mov r5, #0x0000 
-    str r5, [r1, #GPIO_DOUT] //Sett til ouput
-
-    //ldr r4, [r2, #GPIO_DIN] //Input til r4
-    //lsl r4, r4, #8 //Left shift input 8bits
-    //eor r3, r3, r5
-    //eor r3, r3, r4 //XOR input med tidligere inputer
-    //str r3, [r1, #GPIO_DOUT] //Sett til ouput
-
-	bx lr //branch back to link register
-
-/////////////////////////////////////////////////////////////////////////////
-.thumb_func
+    /////////////////////////////////////////////////////////////////////////////
+   .thumb_func
 dummy_handler:
     b .  // do nothing

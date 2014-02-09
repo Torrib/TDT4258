@@ -9,8 +9,6 @@
     //
     /////////////////////////////////////////////////////////////////////////////
 
-	//The power saver edition
-
 .section .vectors
 
     .long   stack_top               /* Top of Stack                 */
@@ -89,16 +87,12 @@ gpio_pc_base_addr:
     .long GPIO_PC_BASE
 nvic_iser0:
     .long ISER0
-scr_addr:
-    .long SCR
-emu_base_addr:
-    .long EMU_BASE
 
 .globl  _reset
 .type   _reset, %function
 .thumb_func
 _reset:
-	/* GPIO CLOCK */
+    /* GPIO CLOCK */
     ldr r1, cmu_base_addr //Load CMU base adress
     ldr r2, [r1, #CMU_HFPERCLKEN0] //Load current value of HFPERCLK_ENABLE
 
@@ -109,39 +103,6 @@ _reset:
 
     //store new value
     str r2, [r1, #CMU_HFPERCLKEN0]
-
-    /* Power saving */
-	//Turn off LFACLK/LFBCLK
-	mov r5, #0
-	str r5, [r1, #CMU_LFCLKSEL]
-
-    //Set energy mode 3
-	//EM4CTRL, EMVREG, EM2BLOCK = 0, SLEEPDEEP=1
-    ldr r4, emu_base_addr
-    mov r5, #0
-    str r5, [r4, #EMU_CTRL]
-
-    //Disable ram block 1-3
-    mov r5, #7
-    str r5, [r4, #EMU_MEMCTRL]
-
-
-
-    //Tune CMU clock
-    mov r5, #0
-    str r5, [r1, #CMU_LFRCOCTRL]
-    mov r5, #0
-    str r5, [r1, #CMU_HFRCOCTRL]
-
-    //Clock disable/ enable
-    //ldr r5, =#618
-    //str r5, [r1, #CMU_OSCENCMD]
-
-
-    //Set the Cortex to deep sleep. Branching back from interrupts goes automaticly to sleep mode again
-    ldr r4, scr_addr
-    mov r5, #6
-    str r5, [r4]
 
     /* GPIO Output */
     //Set high drive strength
@@ -161,7 +122,6 @@ _reset:
     str r3, [r2, #GPIO_MODEL]
 
     //Enable internal pull-up
-    // TODO: filter aswell
     mov r3, #0xFF
     str r3, [r2, #GPIO_DOUT]
 
@@ -178,7 +138,7 @@ _reset:
     ldr r4, =#0x802
     str r4, [r5] //Enable interrupt handling 
 
-    wfi //Wait for interrupts
+    bx lr //branch back to link register
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -190,10 +150,8 @@ _reset:
 gpio_handler:
     mov r4, #0xFF
     str r4, [r0, #GPIO_IFC] //Clear interrupt
-    
+
     ldr r4, [r2, #GPIO_DIN]
-    //comp r4, r5
-    //it 
     lsl r4, r4, #8 //Left shift input 8bits
     mov r5, #0
     eor r4, r4, r5
