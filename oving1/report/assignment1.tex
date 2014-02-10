@@ -33,7 +33,7 @@ This assignment is about solving a fairly simple task and then experiment with d
 \lstset{language={[ARM]assembler}}
 
 \section{About the group and the subject}
-The group consists of Tor-Håkon Bonsaksen, Per Øyvind Kanestrøm and Pia Lindkjølen, we are all on our last semester of bachelor in informatics. We decided to take this course since it was recommended to us by previous students. 
+The group consists of Tor-Håkon Bonsaksen, Per Øyvind Kanestrøm and Pia Lindkjølen, we are all on our last semester of bachelor in informatics. The decision to take this course was based on good recommendations from previous students. 
 
 \section{Introduction}
 \subsection{Why is this topic of interest?}
@@ -106,7 +106,7 @@ Space: 3.6-3.7 mA\newline
 Button press: 3.7 mA 
 
 \paragraph{Interrupts}
-In our second version\cite{interrupts} interrupts were  implemented without any kind of sleep. Due to the lack of sleep and the increased amount of logic that needs to run the power consumption was increased by 2.47 mA from the previous program. The power spiked a little during interrupts from 6.12 mA to 6.2 mA.\newline\newline
+In our second version\cite{interrupt} interrupts were  implemented without any kind of sleep. Due to the lack of sleep and the increased amount of logic that needs to run the power consumption was increased by 2.47 mA from the previous program. The power spiked a little during interrupts from 6.12 mA to 6.2 mA.\newline\newline
 Average: 6.12 mA\newline
 Space: 6.1 mA\newline
 Interrupt: 6.2 mA
@@ -133,7 +133,9 @@ Interrupt: 81.95 $\mu$A
 The assignment went fairly well but going from higher level programing to assembly programing was a challenge. All our previous assembly experience is from computer fundamentals course. Usually when encountering a problem programming in for instance Java it can easily be found information about the problem on the internet. During this assignment learning how to read microcontroller reference manuals and work out the solution ourselves was an important part and a new experience. This way the group learned to properly read and process advanced technical manuals. This assignment was very educational, fun and challenging!
 
 \section{Conclusion}
-With a few fairly simple steps the board went from consuming 5.8 mA to around 800 nA while idle. This  staggering result came from good software methodology design and from learning how to tweak the mcu to be more energy efficient. 
+With a few fairly simple steps the board went from consuming 5.8 mA to around 800 nA while idle. This  staggering result came from good software methodology design and from learning how to tweak the mcu to be more energy efficient. Knowing these tricks are essential to succeed in a project using mcu's, especially in todays focus on energy effiency and in the forthcoming rise of IoT (Internet of Things) devices.
+
+It has also been a good learning experience for using the GNU toolchain and giving a better understanding of the lower levels of using mcu's with gpio control and general assembly coding.
 
 
 \begin{thebibliography}{1}
