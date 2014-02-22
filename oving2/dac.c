@@ -17,6 +17,7 @@ void setupDAC()
 	
 	*CMU_HFPERCLKEN0 |= 1 << 17;
 
+	//Prescale=2^5=32
 	*DAC0_CTRL = 0x50010; //frequency 14/32MHz = 437.5KHz
 
 	//Enable left and right audio channels.
