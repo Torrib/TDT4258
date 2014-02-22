@@ -2,10 +2,10 @@
 #include <stdbool.h>
 #include "ex2.h"
 
-
 #include "efm32gg.h"
 #include "gpio.h"
 #include "timer.h"
+#include "dac.h"
 #include "interrupt_handlers.h"
 
 
@@ -16,7 +16,7 @@
   registers are 16 bits.
 */
 /* The period between sound samples, in clock cycles */
-#define   SAMPLE_PERIOD  0xFF 
+#define   SAMPLE_PERIOD  44100 
 
 /* Your code will start executing here */
 int main(void) 
