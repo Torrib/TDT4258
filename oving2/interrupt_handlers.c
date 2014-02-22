@@ -1,9 +1,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "interrupt_handlers.h"
 #include "efm32gg.h"
 
-void gpio_handler();
 
 /* TIMER1 interrupt handler */
 void __attribute__ ((interrupt)) TIMER1_IRQHandler() 
