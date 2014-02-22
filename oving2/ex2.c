@@ -5,6 +5,7 @@
 
 #include "efm32gg.h"
 #include "gpio.h"
+#include "timer.h"
 #include "interrupt_handlers.h"
 
 
@@ -15,7 +16,7 @@
   registers are 16 bits.
 */
 /* The period between sound samples, in clock cycles */
-#define   SAMPLE_PERIOD   0
+#define   SAMPLE_PERIOD  0xFF 
 
 /* Your code will start executing here */
 int main(void) 
@@ -25,9 +26,14 @@ int main(void)
   setupDAC();
   setupTimer(SAMPLE_PERIOD);
   
+	//Start the timer.	
+	startTimer();  
+
   /* Enable interrupt handling */
   setupNVIC();
-  
+
+
+
   /* TODO for higher energy efficiency, sleep while waiting for interrupts
      instead of infinite loop for busy-waiting
   */
@@ -46,11 +52,13 @@ void setupNVIC()
      assignment.
   */
 	/*GPIO*/
+	*ISER0 |= 1 << 1; //even
+	*ISER0 |= 1 << 11; //Odd
 	
 	/*TIMER1*/
+	*ISER0 |= 1 << 12; //Enable timer interrupts
 
 	/*Enable the interrupts*/
-	*ISER0 = 0x802;
 }
 
 /* if other interrupt handlers are needed, use the following names: 
