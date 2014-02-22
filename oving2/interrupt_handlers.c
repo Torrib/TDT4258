@@ -4,45 +4,52 @@
 #include "interrupt_handlers.h"
 #include "efm32gg.h"
 
-uint16_t noise = 20000;
-uint32_t counter = 0;
+int noise = 0;
+int frequency = 0;
+
+int counter = 0;
+int i = 200;
+
+int song[] = { 146, 196, 130, 146, 146 };
+
 
 /* TIMER1 interrupt handler */
 void __attribute__ ((interrupt)) TIMER1_IRQHandler()
 {
+	//Clearing pending interrupt
     *TIMER1_IFC = 1;
-  /*
-    TODO feed new samples to the DAC
-    remember to clear the pending interrupt by writing 1 to TIMER1_IFC
-  */
-    *DAC0_CH0DATA = noise;
+
+	*DAC0_CH0DATA = noise;
     *DAC0_CH1DATA = noise;
+
+	*TIMER1_TOP = i;
 }
 
 /* GPIO even pin interrupt handler */
 void __attribute__ ((interrupt)) GPIO_EVEN_IRQHandler()
 {
-    *GPIO_IFC = 0xff;
-    /* TODO handle button pressed event, remember to clear pending interrupt */
-    //*GPIO_PA_DOUT = 0x0000; /* turn on LEDs D4-D8 (LEDs are active low) */
     gpio_handler();
 }
 
 /* GPIO odd pin interrupt handler */
 void __attribute__ ((interrupt)) GPIO_ODD_IRQHandler()
 {
-    *GPIO_IFC = 0xff;
-    /* TODO handle button pressed event, remember to clear pending interrupt */
-    //*GPIO_PA_DOUT = 0x0000; /* turn on LEDs D4-D8 (LEDs are active low) */
     gpio_handler();
 }
 
 void gpio_handler()
 {
-    //noise += 100;
+	//i += 25;
+	noise += 25;
+
+	//Reset GPIO interupts
+    *GPIO_IFC = 0xff;
+
+	//Enables coresponding led on button press
     uint32_t input = *GPIO_PC_DIN;
     input = input << 8;
     input = input ^ 0;
 
     *GPIO_PA_DOUT = input;
 }
+

@@ -5,7 +5,7 @@
 #include "efm32gg.h"
 
 /* function to setup the timer */
-void setupTimer(uint16_t period)
+void setupTimer(uint32_t period)
 {
   /*
     TODO enable and set up the timer
@@ -34,5 +34,10 @@ void startTimer()
 void stopTimer()
 {
     *TIMER1_CMD = 0;
+}
+
+void setTimer(int frequency)
+{
+	*TIMER1_TOP = frequency;
 }
 
