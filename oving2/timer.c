@@ -8,7 +8,7 @@
 void setupTimer(uint16_t period)
 {
   /*
-    TODO enable and set up the timer
+    Enable and set up the timer
 
     1. Enable clock to timer by setting bit 6 in CMU_HFPERCLKEN0
     2. Write the period to register TIMER1_TOP

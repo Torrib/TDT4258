@@ -3,9 +3,26 @@
 
 #include "interrupt_handlers.h"
 #include "efm32gg.h"
+#include "music.h"
 
 uint16_t noise = 20000;
 uint32_t counter = 0;
+
+/*
+C 523 Hz
+B 494 Hz
+Bb 466 Hz
+A 440 Hz
+Ab 415 Hz
+G 392 Hz
+Gb 370 Hz
+F 349 Hz
+E 330 Hz
+Eb 311 Hz
+D 294 Hz
+Db 277 Hz
+C 262 Hz
+*/
 
 /* TIMER1 interrupt handler */
 void __attribute__ ((interrupt)) TIMER1_IRQHandler()
