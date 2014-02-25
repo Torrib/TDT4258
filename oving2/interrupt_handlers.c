@@ -8,21 +8,7 @@
 uint16_t noise = 20000;
 uint32_t counter = 0;
 
-/*
-C 523 Hz
-B 494 Hz
-Bb 466 Hz
-A 440 Hz
-Ab 415 Hz
-G 392 Hz
-Gb 370 Hz
-F 349 Hz
-E 330 Hz
-Eb 311 Hz
-D 294 Hz
-Db 277 Hz
-C 262 Hz
-*/
+uint16_t test = 400;
 
 /* TIMER1 interrupt handler */
 void __attribute__ ((interrupt)) TIMER1_IRQHandler()
@@ -32,8 +18,11 @@ void __attribute__ ((interrupt)) TIMER1_IRQHandler()
     TODO feed new samples to the DAC
     remember to clear the pending interrupt by writing 1 to TIMER1_IFC
   */
-    *DAC0_CH0DATA = noise;
-    *DAC0_CH1DATA = noise;
+    //*DAC0_CH0DATA = noise;
+    //*DAC0_CH1DATA = noise;
+	
+	//Change amplitude 
+	musicInterrupt();
 }
 
 /* GPIO even pin interrupt handler */
@@ -54,8 +43,12 @@ void __attribute__ ((interrupt)) GPIO_ODD_IRQHandler()
     gpio_handler();
 }
 
+//DAC0_IRQHandler
+
 void gpio_handler()
 {
+	test += 1;
+	musicSetFrequency(test);
     //noise += 100;
     uint32_t input = *GPIO_PC_DIN;
     input = input << 8;

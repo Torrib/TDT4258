@@ -7,6 +7,7 @@
 #include "timer.h"
 #include "dac.h"
 #include "interrupt_handlers.h"
+#include "music.h"
 
 /*
  * TODO calculate the appropriate sample period for the sound wave(s)
@@ -31,6 +32,8 @@ int main(void)
     /* Enable interrupt handling */
     setupNVIC();
 
+	uint16_t a = 294;
+	musicSetFrequency(a);
     /* TODO for higher energy efficiency, sleep while waiting for interrupts
      * instead of infinite loop for busy-waiting
      */
