@@ -22,6 +22,7 @@
 int main(void)
 {
     /* Call the peripheral setup functions */
+    setupEnergy();
     setupGPIO();
     setupDAC();
     setupTimer(SAMPLE_PERIOD);
@@ -32,14 +33,26 @@ int main(void)
     /* Enable interrupt handling */
     setupNVIC();
 
-	uint16_t a = 294;
-	musicSetFrequency(a);
-    /* TODO for higher energy efficiency, sleep while waiting for interrupts
+    uint16_t a = 294;
+    musicSetFrequency(a);
+
+    /*  for higher energy efficiency, sleep while waiting for interrupts
      * instead of infinite loop for busy-waiting
      */
-    while(1);
+    __asm("wfi");
 
     return 0;
+}
+
+void setupEnergy(){
+    /* Disable RAM blocks*/
+
+    /* Set EM3 */
+    //EM4CTRL, EMVREG, EM2BLOCK = 0, SLEEPDEEP=1
+    *EMU_CTRL = 0;
+
+    /* Set deep sleep*/
+    *SCR = 6;
 }
 
 void setupNVIC()
