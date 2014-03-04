@@ -20,9 +20,9 @@ void __attribute__ ((interrupt)) TIMER1_IRQHandler()
   */
     //*DAC0_CH0DATA = noise;
     //*DAC0_CH1DATA = noise;
-	
-	//Change amplitude 
-	musicInterrupt();
+
+    //Change amplitude
+    musicInterrupt();
 }
 
 /* GPIO even pin interrupt handler */
@@ -47,8 +47,8 @@ void __attribute__ ((interrupt)) GPIO_ODD_IRQHandler()
 
 void gpio_handler()
 {
-	test += 1;
-	musicSetFrequency(test);
+    test += 1;
+    musicSetFrequency(test);
     //noise += 100;
     uint32_t input = *GPIO_PC_DIN;
     input = input << 8;
