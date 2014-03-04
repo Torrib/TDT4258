@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include "efm32gg.h"
 #include "music.h"
+#include "math.h"
 
 uint8_t sine_wave[256] = {
         0x80, 0x83, 0x86, 0x89, 0x8C, 0x90, 0x93, 0x96,
@@ -54,32 +55,59 @@ C 262 Hz
 */
 
 uint16_t frequency = 0;
-
+uint32_t a = pow(2, (1/12));
+uint8_t n = 0;
+uint8_t amplitude = 1;
+uint16_t w = 0;
+uint8_t time = 0;
+uint8_t phase = 0;
 uint8_t location = 0;
+uint8_t volume = 50;
 
-void musicSetFrequency(uint16_t f)
+void musicSetFrequency(uint8_t note)
 {
     /*
      * Clock runs at 14Mhz/sample_size
      * 14Mhz/frequency = sample_size
      */
-    uint16_t x = 14000000 / f;
-    x = x / sizeof(sine_wave);
-    *TIMER1_TOP = x;
-    location = 0;
+    //uint16_t x = 14000000 / f;
+    //x = x / sizeof(sine_wave);
+    //*TIMER1_TOP = x;
+    //location = 0;
+    //
+    //http://www.phy.mtu.edu/~suits/NoteFreqCalcs.html
+
+    /* fn = f0 * (a)^n
+     * where
+     * f0 = the frequency of one fixed note which must be defined. A common choice is setting the A above middle C (A4) at f0 = 440 Hz.
+     * n = the number of half steps away from the fixed note you are. If you are at a higher note, n is positive. If you are on a lower note, n is negative.
+     * fn = the frequency of the note n half steps away.
+     */
+    n += note;
+    phase = w;
+
+    frequency = 440 * pow(a, n);
+
+    w = 2 * M_PI * frequency;
+
+    //w / # iterations? time count up to it.
+
 }
 
 void musicInterrupt()
 {
-    uint16_t sound = sine_wave[location] + 500;
+    time += 1;
+    uint16_t sound = (amplitude * sin(w * time + phase)) + volume;//sine_wave[location] + 500;
 
     //Set sine amplitude
     *DAC0_CH0DATA = sound;
     *DAC0_CH1DATA = sound;
 
+    /*
     if(location > sizeof(sine_wave) - 1)
         location = 0;
     else
         location++;
+    */
 }
 

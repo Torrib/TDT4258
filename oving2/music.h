@@ -1,3 +1,3 @@
-void musicSetFrequency(uint16_t f);
+void musicSetFrequency(uint8_t note);
 
 void musicInterrupt();

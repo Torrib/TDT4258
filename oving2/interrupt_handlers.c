@@ -5,10 +5,7 @@
 #include "efm32gg.h"
 #include "music.h"
 
-uint16_t noise = 20000;
-uint32_t counter = 0;
-
-uint16_t test = 400;
+uint16_t test = 0;
 
 /* TIMER1 interrupt handler */
 void __attribute__ ((interrupt)) TIMER1_IRQHandler()
