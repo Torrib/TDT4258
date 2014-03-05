@@ -54,15 +54,17 @@ Db 277 Hz
 C 262 Hz
 */
 
+#define A pow(2, (1/12))
+
 uint16_t frequency = 0;
-uint32_t a = pow(2, (1/12));
 uint8_t n = 0;
 uint8_t amplitude = 1;
 uint16_t w = 0;
 uint8_t time = 0;
 uint8_t phase = 0;
+
+
 uint8_t location = 0;
-uint8_t volume = 50;
 
 void musicSetFrequency(uint8_t note)
 {
@@ -84,20 +86,21 @@ void musicSetFrequency(uint8_t note)
      * fn = the frequency of the note n half steps away.
      */
     n += note;
-    phase = w;
+    phase = w; //tan av allerede verdi?
 
-    frequency = 440 * pow(a, n);
+    frequency = 440 * pow(A, n);
 
     w = 2 * M_PI * frequency;
 
     //w / # iterations? time count up to it.
-
+    time = 0;
+    musicInterrupt();
 }
 
 void musicInterrupt()
 {
+    uint16_t sound = amplitude * sin(w * time + phase);//sine_wave[location] + 500;
     time += 1;
-    uint16_t sound = (amplitude * sin(w * time + phase)) + volume;//sine_wave[location] + 500;
 
     //Set sine amplitude
     *DAC0_CH0DATA = sound;
