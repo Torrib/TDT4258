@@ -54,15 +54,18 @@ Db 277 Hz
 C 262 Hz
 */
 
-#define A pow(2, (1/12))
+#define A 1.0594630943592953 
+#define PI 3.141592653589793238462643383279502884197169399375105820974944592
+#define A4_FREQ 440
 
 uint16_t frequency = 0;
 uint8_t n = 0;
-uint8_t amplitude = 1;
+uint8_t amplitude = 127;
 uint16_t w = 0;
 uint8_t time = 0;
 uint8_t phase = 0;
 
+uint8_t buffer[];
 
 uint8_t location = 0;
 
@@ -88,9 +91,17 @@ void musicSetFrequency(uint8_t note)
     n += note;
     phase = w; //tan av allerede verdi?
 
-    frequency = 440 * pow(A, n);
+    frequency = A4_FREQ * pow(A, n);
 
-    w = 2 * M_PI * frequency;
+    w = 2 * PI * frequency;
+
+	uint8_t len = w / 44100;
+	buffer[len];
+
+
+	for (int i = 0; i < len; i++){
+		buffer[i] = ceil(amplitude * sin(w * i));// + phase)
+	}
 
     //w / # iterations? time count up to it.
     time = 0;
@@ -99,8 +110,11 @@ void musicSetFrequency(uint8_t note)
 
 void musicInterrupt()
 {
-    uint16_t sound = amplitude * sin(w * time + phase);//sine_wave[location] + 500;
+    uint16_t sound = buffer[time];//sine_wave[location] + 500;
     time += 1;
+
+	if (time >= sizeof(buffer))
+		time = 0;
 
     //Set sine amplitude
     *DAC0_CH0DATA = sound;
