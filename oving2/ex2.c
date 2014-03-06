@@ -33,8 +33,8 @@ int main(void)
     /* Enable interrupt handling */
     setupNVIC();
 
-    uint16_t a = 294;
-    musicSetFrequency(a);
+    //uint16_t a = 294;
+    //musicSetFrequency(a);
 
     /*  for higher energy efficiency, sleep while waiting for interrupts
      * instead of infinite loop for busy-waiting
@@ -44,12 +44,13 @@ int main(void)
     return 0;
 }
 
-void setupEnergy(){
+void setupEnergy()
+{
     /* Disable RAM blocks*/
 
     /* Set EM3 */
     //EM4CTRL, EMVREG, EM2BLOCK = 0, SLEEPDEEP=1
-    *EMU_CTRL = 0;
+    //*EMU_CTRL = 0;
 
     /* Set deep sleep*/
     *SCR = 6;

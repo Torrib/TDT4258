@@ -45,7 +45,7 @@ void __attribute__ ((interrupt)) GPIO_ODD_IRQHandler()
 void gpio_handler()
 {
     test += 1;
-    musicSetFrequency(test);
+    //musicSetFrequency(test);
     //noise += 100;
     uint32_t input = *GPIO_PC_DIN;
     input = input << 8;
