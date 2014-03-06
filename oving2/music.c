@@ -31,10 +31,10 @@ uint16_t w = 0;
 uint8_t time = 0;
 uint8_t phase = 0;
 
-int buffer[256];
+uint8_t buffer[256];
 
-int buffer_length = 0;
-
+uint8_t buffer_length = 0;
+uint8_t buffer_placement = 0;
 void musicSetFrequency(uint8_t note)
 {
     /*
@@ -61,25 +61,25 @@ void musicSetFrequency(uint8_t note)
 
     w = 2 * PI * frequency;
 
-	uint8_t len = w / 44100;
+	buffer_length = 44100 / w;
 
-	for (int i = 0; i < 44100; i++)
+	for (int i = 0; i < buffer_length; i++)
 	{
-		buffer[i] = ceil(amplitude * sin(w * len * i));// + phase)
+		buffer[i] = ceil(amplitude * sin(w * buffer_length * i));// + phase)
 	}
 
     //w / # iterations? time count up to it.
-    time = 0;
+    buffer_placement = 0;
     musicInterrupt();
 }
 
 void musicInterrupt()
 {
     uint16_t sound = buffer[time];//sine_wave[location] + 500;
-    time += 1;
+    buffer_placement += 1;
 
-	if (time >= sizeof(buffer))
-		time = 0;
+	if (buffer_placement >= buffer_length)
+		buffer_placement = 0;
 
     //Set sine amplitude
     *DAC0_CH0DATA = sound;
