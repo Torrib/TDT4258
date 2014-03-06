@@ -16,13 +16,12 @@
  * registers are 16 bits.
  */
 /* The period between sound samples, in clock cycles */
-#define   SAMPLE_PERIOD  44100
+#define   SAMPLE_PERIOD 14000000/44100 
 
 /* Your code will start executing here */
 int main(void)
 {
     /* Call the peripheral setup functions */
-    setupEnergy();
     setupGPIO();
     setupDAC();
     setupTimer(SAMPLE_PERIOD);
@@ -33,13 +32,12 @@ int main(void)
     /* Enable interrupt handling */
     setupNVIC();
 
-    //uint16_t a = 294;
-    //musicSetFrequency(a);
+    setupEnergy();
 
     /*  for higher energy efficiency, sleep while waiting for interrupts
      * instead of infinite loop for busy-waiting
      */
-    __asm("wfi");
+	__asm("wfi");
 
     return 0;
 }
@@ -53,7 +51,7 @@ void setupEnergy()
     //*EMU_CTRL = 0;
 
     /* Set deep sleep*/
-    *SCR = 6;
+    *SCR = 2; //6
 }
 
 void setupNVIC()
@@ -71,8 +69,6 @@ void setupNVIC()
 
     /*TIMER1*/
     *ISER0 |= 1 << 12; //Enable timer interrupts
-
-    /*Enable the interrupts*/
 }
 
 /* if other interrupt handlers are needed, use the following names:

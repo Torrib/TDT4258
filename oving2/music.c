@@ -24,23 +24,20 @@ C 262 Hz
 #define PI 3.141592653589793238462643383279502884197169399375105820974944592
 #define A4_FREQ 440
 
-uint16_t frequency = 0;
-uint8_t n = 0;
 uint8_t amplitude = 127;
-uint16_t w = 0;
-uint8_t time = 0;
-uint8_t phase = 0;
 
-uint8_t buffer[256];
+uint16_t buffer[1024];
 
-uint8_t buffer_length = 0;
+int buffer_length = 0;
 uint8_t buffer_placement = 0;
+
 void musicSetFrequency(uint8_t note)
 {
     /*
      * Clock runs at 14Mhz/sample_size
-     * 14Mhz/frequency = sample_size
+	 * 14000000/44100 = 317.460317
      */
+
     //uint16_t x = 14000000 / f;
     //x = x / sizeof(sine_wave);
     //*TIMER1_TOP = x;
@@ -54,42 +51,32 @@ void musicSetFrequency(uint8_t note)
      * n = the number of half steps away from the fixed note you are. If you are at a higher note, n is positive. If you are on a lower note, n is negative.
      * fn = the frequency of the note n half steps away.
      */
-    n += note;
-    phase = w; //tan av allerede verdi?
+    double frequency = A4_FREQ * pow(A, note);
 
-    frequency = A4_FREQ * pow(A, n);
-
-    w = 2 * PI * frequency;
-
-	buffer_length = 44100 / w;
+	buffer_length = getSoundLen(frequency);
 
 	for (int i = 0; i < buffer_length; i++)
 	{
-		buffer[i] = ceil(amplitude * sin(w * buffer_length * i));// + phase)
+		buffer[i] = amplitude * (0 + sin(2 * PI * i / buffer_length));
 	}
 
-    //w / # iterations? time count up to it.
-    buffer_placement = 0;
-    musicInterrupt();
+}
+
+int getSoundLen(double freq)
+{
+	return 44100 / freq;
 }
 
 void musicInterrupt()
 {
-    uint16_t sound = buffer[time];//sine_wave[location] + 500;
+    uint16_t sound = buffer[buffer_placement] + 2000;
     buffer_placement += 1;
 
-	if (buffer_placement >= buffer_length)
+	if (buffer_placement > buffer_length)
 		buffer_placement = 0;
 
     //Set sine amplitude
     *DAC0_CH0DATA = sound;
     *DAC0_CH1DATA = sound;
-
-    /*
-    if(location > sizeof(sine_wave) - 1)
-        location = 0;
-    else
-        location++;
-    */
 }
 
