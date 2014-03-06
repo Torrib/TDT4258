@@ -27,7 +27,7 @@ int main(void)
     setupTimer(SAMPLE_PERIOD);
 
     //Start the timer.
-    startTimer();
+    //startTimer();
 
     /* Enable interrupt handling */
     setupNVIC();

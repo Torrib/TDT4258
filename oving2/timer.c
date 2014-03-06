@@ -33,6 +33,6 @@ void startTimer()
 
 void stopTimer()
 {
-    *TIMER1_CMD = 0;
+    *TIMER1_CMD = 2;
 }
 
