@@ -16,7 +16,7 @@
  * registers are 16 bits.
  */
 /* The period between sound samples, in clock cycles */
-#define   SAMPLE_PERIOD 14000000/44100 
+#define   SAMPLE_PERIOD 14000000/44100
 
 /* Your code will start executing here */
 int main(void)

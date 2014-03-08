@@ -52,23 +52,23 @@ int *song_pointer; //= song;
 
 void gpio_handler()
 {
-	if(i < 3){
-		i++;
-		return;
-	}
-	
-    uint32_t input = *GPIO_PC_DIN;
-	//Haavard bruker GPIO_IF (finne i dokumentasjon)
-	// GPIO_IFC skal settes til denne verdien også.
-	if(BUTTON_CLICK(*GPIO_IF, 7))
-	{
-		/* Start timer and set correct song */
-		musicSetSong(song_pointer);
-	
-		startTimer();
-	}
+    if(i < 3){
+        i++;
+        return;
+    }
 
-	/* Hightlight the pressed led */
+    uint32_t input = *GPIO_PC_DIN;
+    //Haavard bruker GPIO_IF (finne i dokumentasjon)
+    // GPIO_IFC skal settes til denne verdien også.
+    if(BUTTON_CLICK(*GPIO_IF, 7))
+    {
+        /* Start timer and set correct song */
+        musicSetSong(song_pointer);
+
+        startTimer();
+    }
+
+    /* Hightlight the pressed led */
     input = input << 8;
     input = input ^ 0;
     *GPIO_PA_DOUT = input;

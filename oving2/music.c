@@ -5,36 +5,37 @@
 #include "math.h"
 #include "timer.h"
 
-#define C 523 
-#define B 494 
+#define C 523
+#define B 494
 #define Bb 466
-#define A 440 
+#define A 440
 #define Ab 415
-#define G 392 
+#define G 392
 #define Gb 370
-#define F 349 
-#define E 330 
+#define F 349
+#define E 330
 #define Eb 311
-#define D 294 
+#define D 294
 #define Db 277
-//#define C 262 
+//#define C 262
 
 /*
-	TODO
-		PROBLEMS FOR THE MOMENT
-		1. Need three songs
-		2. Song referencing from interrupt
-		FIXED 3. Wierd sound at end. How to set no sound?
-		FIXED 4. How to start/ stop timer correctly
-		5. How to avoid gpio_handler to run code when started?
-			Run when specific buttons are pressed instead
-				macro added. Still reacts on interrupts. Still using dirtyfix
-		6. Handle note length correctly
+    TODO
+        PROBLEMS FOR THE MOMENT
+        1. Need three songs
+        2. Song referencing from interrupt
+        FIXED 3. Wierd sound at end. How to set no sound?
+        FIXED 4. How to start/ stop timer correctly
+        5. How to avoid gpio_handler to run code when started?
+            Run when specific buttons are pressed instead
+                macro added. Still reacts on interrupts. Still using dirtyfix
+        6. Handle note length correctly
 */
 
-#define A_VALUE 1.0594630943592953 
+#define A_VALUE 1.0594630943592953
 #define PI 3.1415926535897932
 #define A4_FREQ 440
+#define NOTE_LENGTH 400 /* The length of one note. */
 
 void musicSetFrequency(int note);
 int getSoundLen(double freq);
@@ -46,27 +47,28 @@ int buffer_length = 0;
 int buffer_placement = 0;
 
 int song[9] = {0, 1, 2, 3, 4, 7, 5, 5, 5};
+int song_note_length[9] = {1, 2, 1, 2, 1, 2, 2, 3, 1}
+
 //int *song;
 int song_placement = 0;
 int song_length = 0;
 
-int note_current_length = 0; 
-int note_length = 400;
+int note_current_length = 0;
 
 void musicSetSong(int *song_pointer)
 {
-	//*song = *song_pointer;
-	song_placement = 0;
-	song_length = sizeof(song) / sizeof(int);
+    //*song = *song_pointer;
+    song_placement = 0;
+    song_length = sizeof(song) / sizeof(int);
 
-	musicSetFrequency(song[0]);
+    musicSetFrequency(song[0]);
 }
 
 void musicSetFrequency(int note)
 {
     /*
      * Clock runs at 14Mhz/sample_size
-	 * 14000000/44100 = 317.460317
+     * 14000000/44100 = 317.460317
      */
 
     //http://www.phy.mtu.edu/~suits/NoteFreqCalcs.html
@@ -78,17 +80,17 @@ void musicSetFrequency(int note)
      */
     double frequency = A4_FREQ * pow(A_VALUE, note);
 
-	buffer_length = getSoundLen(frequency);
+    buffer_length = getSoundLen(frequency);
 
-	for (int i = 0; i < buffer_length; i++)
-	{
-		buffer[i] = amplitude * (0 + sin(2 * PI * i / buffer_length));
-	}
+    for (int i = 0; i < buffer_length; i++)
+    {
+        buffer[i] = amplitude * (0 + sin(2 * PI * i / buffer_length));
+    }
 }
 
 int getSoundLen(double freq)
 {
-	return 44100 / freq;
+    return 44100 / freq;
 }
 
 void musicInterrupt()
@@ -99,33 +101,33 @@ void musicInterrupt()
     //Set sine amplitude
     *DAC0_CH0DATA = sound;
     *DAC0_CH1DATA = sound;
-	
-	/* If buffer of notes is complete */
-	if (buffer_placement > buffer_length)
-	{
-		/* Check if we should play the note again */
-		note_current_length++;
-		if(note_current_length < note_length)
-			buffer_placement = 0;
-		else
-		{
-				/* Go to next note */	
-				song_placement++;
-				
-				note_current_length = 0;
 
-				if(song_placement < song_length)
-				{
-					musicSetFrequency(song[song_placement]);
-					//TODO Fetch new note_length
-				}
-				/* Song is done */
-				else
-				{
-					/* Stop the timer */
-					stopTimer();
-				}
-		}
-	}
+    /* If buffer of notes is complete */
+    if (buffer_placement > buffer_length)
+    {
+        /* Check if we should play the note again */
+        note_current_length++;
+        if(note_current_length < song_note_length[buffer_placement] * NOTE_LENGTH)
+            buffer_placement = 0;
+        else
+        {
+                /* Go to next note */
+                song_placement++;
+
+                note_current_length = 0;
+
+                if(song_placement < song_length)
+                {
+                    musicSetFrequency(song[song_placement]);
+                    //TODO Fetch new note_length
+                }
+                /* Song is done */
+                else
+                {
+                    /* Stop the timer */
+                    stopTimer();
+                }
+        }
+    }
 }
 
