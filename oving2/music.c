@@ -4,6 +4,7 @@
 #include "music.h"
 #include "math.h"
 #include "timer.h"
+#include "constants.h"
 
 #define C 523
 #define B 494
@@ -21,7 +22,6 @@
 
 /*
     TODO
-        PROBLEMS FOR THE MOMENT
         1. Need three songs
         2. Song referencing from interrupt
         FIXED 3. Wierd sound at end. How to set no sound?
@@ -30,6 +30,7 @@
             Run when specific buttons are pressed instead
                 macro added. Still reacts on interrupts. Still using dirtyfix
         6. Handle note length correctly
+            Maybe done.. check.
 */
 
 #define A_VALUE 1.0594630943592953
@@ -42,6 +43,7 @@ int getSoundLen(double freq);
 
 uint8_t amplitude = 127;
 
+/* Sinus note buffer */
 uint16_t buffer[1024];
 int buffer_length = 0;
 int buffer_placement = 0;
@@ -55,6 +57,10 @@ int song_length = 0;
 
 int note_current_length = 0;
 
+/**
+ * Set the song to be played.
+ * Params: Array of notes and note lengths
+ */
 void musicSetSong(int *song_pointer)
 {
     //*song = *song_pointer;
@@ -64,13 +70,11 @@ void musicSetSong(int *song_pointer)
     musicSetFrequency(song[0]);
 }
 
+/**
+ * Fill the buffer with one note that is n half steps away from A4.
+ */
 void musicSetFrequency(int note)
 {
-    /*
-     * Clock runs at 14Mhz/sample_size
-     * 14000000/44100 = 317.460317
-     */
-
     //http://www.phy.mtu.edu/~suits/NoteFreqCalcs.html
     /* fn = f0 * (a)^n
      * where
@@ -78,9 +82,7 @@ void musicSetFrequency(int note)
      * n = the number of half steps away from the fixed note you are. If you are at a higher note, n is positive. If you are on a lower note, n is negative.
      * fn = the frequency of the note n half steps away.
      */
-    double frequency = A4_FREQ * pow(A_VALUE, note);
-
-    buffer_length = getSoundLen(frequency);
+    buffer_length = getSoundLen(A4_FREQ * pow(A_VALUE, note));
 
     for (int i = 0; i < buffer_length; i++)
     {
@@ -88,11 +90,19 @@ void musicSetFrequency(int note)
     }
 }
 
+/**
+ * Get the sinus length of one note.
+ */
 int getSoundLen(double freq)
 {
-    return 44100 / freq;
+    return SAMPLE_RATE / freq;
 }
 
+/**
+ * Run on each interrupt.
+ * Sets the DAC data from the buffer. If the buffer is done, then it checks if it should play the note again.
+ * Thereafter change the note. If all the notes have been played, then TIMER1 interrupts will be stopped.
+ */
 void musicInterrupt()
 {
     uint16_t sound = buffer[buffer_placement] + 2000;
@@ -111,22 +121,22 @@ void musicInterrupt()
             buffer_placement = 0;
         else
         {
-                /* Go to next note */
-                song_placement++;
+            /* Go to next note */
+            song_placement++;
 
-                note_current_length = 0;
+            note_current_length = 0;
 
-                if(song_placement < song_length)
-                {
-                    musicSetFrequency(song[song_placement]);
-                    //TODO Fetch new note_length
-                }
-                /* Song is done */
-                else
-                {
-                    /* Stop the timer */
-                    stopTimer();
-                }
+            if(song_placement < song_length)
+            {
+                musicSetFrequency(song[song_placement]);
+                //TODO Fetch new note_length
+            }
+            /* Song is done */
+            else
+            {
+                /* Stop the timer */
+                stopTimer();
+            }
         }
     }
 }
