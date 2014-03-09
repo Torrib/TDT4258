@@ -9,29 +9,21 @@
 #include "dac.h"
 #include "interrupt_handlers.h"
 
-/*
- * TODO calculate the appropriate sample period for the sound wave(s)
- * you want to generate. The core clock (which the timer clock is derived
- * from) runs at 14 MHz by default. Also remember that the timer counter
- * registers are 16 bits.
- */
-
-/* Your code will start executing here */
 int main(void)
 {
+    setupEnergy();
     /* Enable interrupt handling */
     setupNVIC();
 
     /* Call the peripheral setup functions */
     setupGPIO();
+	// Setup the DAC
     setupDAC();
+	//Setup the timer with 14Mhz / 44100
     setupTimer(SAMPLE_PERIOD);
+	//Setup energy saving measurements
 
-    setupEnergy();
-
-    /*  for higher energy efficiency, sleep while waiting for interrupts
-     * instead of infinite loop for busy-waiting
-     */
+	//Enter sleep while waiting for interrupts
     __asm("wfi");
 
     return 0;
@@ -39,6 +31,7 @@ int main(void)
 
 void setupEnergy()
 {
+	//TODO
     /* Disable RAM blocks*/
 
     /* Set EM3 */
@@ -46,23 +39,16 @@ void setupEnergy()
     //*EMU_CTRL = 0;
 
     /* 2=sleep, 6=deep sleep.*/
-    *SCR = 2;
+    *SCR = 4;
 }
 
 void setupNVIC()
 {
-    /* TODO use the NVIC ISERx registers to enable handling of interrupt(s)
-     * remember two things are necessary for interrupt handling:
-     *  - the peripheral must generate an interrupt signal
-     *  - the NVIC must be configured to make the CPU handle the signal
-     * You will need TIMER1, GPIO odd and GPIO even interrupt handling for this
-     * assignment.
-     */
-    /*GPIO*/
+    // Enable GPIO interrupts
     *ISER0 |= 1 << 1; //even
     *ISER0 |= 1 << 11; //Odd
 
-    /*TIMER1*/
+    // Enable Timer1 interrupts
     *ISER0 |= 1 << 12; //Enable timer interrupts
 }
 
