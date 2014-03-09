@@ -17,8 +17,6 @@ void __attribute__ ((interrupt)) TIMER1_IRQHandler()
     TODO feed new samples to the DAC
     remember to clear the pending interrupt by writing 1 to TIMER1_IFC
   */
-    //*DAC0_CH0DATA = noise;
-    //*DAC0_CH1DATA = noise;
 
     //Change amplitude
     musicInterrupt();
@@ -52,6 +50,7 @@ int *song_pointer; //= song;
 
 void gpio_handler()
 {
+    //Fugly fix. On reset, three interrupts will come.
     if(i < 3){
         i++;
         return;

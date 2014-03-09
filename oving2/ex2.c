@@ -8,7 +8,6 @@
 #include "timer.h"
 #include "dac.h"
 #include "interrupt_handlers.h"
-#include "music.h"
 
 /*
  * TODO calculate the appropriate sample period for the sound wave(s)
@@ -20,16 +19,13 @@
 /* Your code will start executing here */
 int main(void)
 {
+    /* Enable interrupt handling */
+    setupNVIC();
+
     /* Call the peripheral setup functions */
     setupGPIO();
     setupDAC();
     setupTimer(SAMPLE_PERIOD);
-
-    //Start the timer.
-    //startTimer();
-
-    /* Enable interrupt handling */
-    setupNVIC();
 
     setupEnergy();
 
