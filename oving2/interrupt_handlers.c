@@ -62,11 +62,24 @@ void gpio_handler()
     if(BUTTON_CLICK(*GPIO_IF, 7))
     {
         /* Start timer and set correct song */
-        musicSetSong(song_pointer);
-
+        musicSetSong(0);
+        startTimer();
+    }
+    
+	if(BUTTON_CLICK(*GPIO_IF, 6))
+    {
+        /* Start timer and set correct song */
+        musicSetSong(1);
         startTimer();
     }
 
+	
+	if(BUTTON_CLICK(*GPIO_IF, 5))
+    {
+        /* Start timer and set correct song */
+        musicSetSong(2);
+        startTimer();
+    }
     /* Hightlight the pressed led */
     input = input << 8;
     input = input ^ 0;

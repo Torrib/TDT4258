@@ -36,7 +36,7 @@
 #define A_VALUE 1.0594630943592953
 #define PI 3.1415926535897932
 #define A4_FREQ 440
-#define NOTE_LENGTH 400 /* The length of one note. */
+#define NOTE_LENGTH 50 /* The length of one note. */
 
 void musicSetFrequency(int note);
 int getSoundLen(double freq);
@@ -48,24 +48,58 @@ uint16_t buffer[1024];
 int buffer_length = 0;
 int buffer_placement = 0;
 
-int song[9] = {0, 1, 2, 3, 4, 7, 5, 5, 5};
-int song_note_length[9] = {1, 2, 1, 2, 1, 2, 2, 3, 1}
-
+/* The song*/
 //int *song;
 int song_placement = 0;
 int song_length = 0;
 
+int *song = 0;
+int *song_note_length = 0;
+
+/* Number of times one note is played */
 int note_current_length = 0;
 
 /**
  * Set the song to be played.
  * Params: Array of notes and note lengths
  */
-void musicSetSong(int *song_pointer)
+void musicSetSong(int song_pointer)
 {
-    //*song = *song_pointer;
+	static int song_intro[11] = {1, 0, -2, 0, -2, 0, -4,0, -2, 0, -2};
+	static int song_intro_note_length[11] = {6, 1, 3, 1, 1, 1, 1, 1, 3, 1, 9};
+
+	static int song_victory[11] = {-1, 0, -1, 0, 2, 0, 5,0, 2, 0, -1};
+	static int song_victory_note_length[11] = {6, 1, 3, 1, 1, 1, 1, 1, 3, 1, 9};
+
+	static int song_hit[1] = {2};
+	static int song_hit_note_length[1] = {4};
+
+	/* New song, start at the beginning */
     song_placement = 0;
-    song_length = sizeof(song) / sizeof(int);
+
+	switch(song_pointer)
+	{
+		case 0:
+			song = song_victory;
+			song_note_length = song_victory_note_length;
+			song_length = sizeof(song_victory) / sizeof(int);
+			break;
+		case 1:
+			song = song_intro;
+			song_note_length = song_intro_note_length;
+			song_length = sizeof(song_intro) / sizeof(int);
+			break;
+		case 2:
+			song = song_hit;
+			song_note_length = song_hit_note_length;
+			song_length = sizeof(song_hit) / sizeof(int);
+			break;
+
+		default:
+			song = 0;
+			song_note_length = 0;
+			song_length = 0;
+	}
 
     musicSetFrequency(song[0]);
 }
@@ -75,19 +109,35 @@ void musicSetSong(int *song_pointer)
  */
 void musicSetFrequency(int note)
 {
-    //http://www.phy.mtu.edu/~suits/NoteFreqCalcs.html
-    /* fn = f0 * (a)^n
-     * where
-     * f0 = the frequency of one fixed note which must be defined. A common choice is setting the A above middle C (A4) at f0 = 440 Hz.
-     * n = the number of half steps away from the fixed note you are. If you are at a higher note, n is positive. If you are on a lower note, n is negative.
-     * fn = the frequency of the note n half steps away.
-     */
-    buffer_length = getSoundLen(A4_FREQ * pow(A_VALUE, note));
+	/* Silence note*/
+	if(note == 0)
+	{
+		buffer[0] = 0;
+	}
+	else
+	{
+			/*
+			 * Clock runs at 14Mhz/sample_size
+			 * 14000000/44100 = 317.460317
+			 */
 
-    for (int i = 0; i < buffer_length; i++)
-    {
-        buffer[i] = amplitude * (0 + sin(2 * PI * i / buffer_length));
-    }
+			//http://www.phy.mtu.edu/~suits/NoteFreqCalcs.html
+			/* fn = f0 * (a)^n
+			 * where
+			 * f0 = the frequency of one fixed note which must be defined. A common choice is setting the A above middle C (A4) at f0 = 440 Hz.
+			 * n = the number of half steps away from the fixed note you are. If you are at a higher note, n is positive. If you are on a lower note, n is negative.
+			 * fn = the frequency of the note n half steps away.
+			 */
+            buffer_length = getSoundLen(A4_FREQ * pow(A_VALUE, note));
+
+			for (int i = 0; i < buffer_length; i++)
+			{
+				buffer[i] = amplitude * (0 + sin(2 * PI * i / buffer_length));
+			}
+
+	}
+
+	buffer_placement = 0;
 }
 
 /**
@@ -105,7 +155,7 @@ int getSoundLen(double freq)
  */
 void musicInterrupt()
 {
-    uint16_t sound = buffer[buffer_placement] + 2000;
+    uint16_t sound = buffer[buffer_placement];
     buffer_placement += 1;
 
     //Set sine amplitude
@@ -117,8 +167,9 @@ void musicInterrupt()
     {
         /* Check if we should play the note again */
         note_current_length++;
-        if(note_current_length < song_note_length[buffer_placement] * NOTE_LENGTH)
+        if(note_current_length < song_note_length[song_placement] * NOTE_LENGTH)
             buffer_placement = 0;
+	/* Change note */
         else
         {
             /* Go to next note */
