@@ -60,9 +60,15 @@ int note_current_length = 0;
 
 void musicSetSong(int song_pointer)
 {
-	static int song_victory[9] = {-7, -7, -2, 3, -7, -7};
-	static int song_victory_note_length[9] = {9, 3, 1, 1, 3, 15};
+	static int song_intro[11] = {1, 0, -2, 0, -2, 0, -4,0, -2, 0, -2};
+	static int song_intro_note_length[11] = {6, 1, 3, 1, 1, 1, 1, 1, 3, 1, 9};
 
+	static int song_victory[11] = {-1, 0, -1, 0, 2, 0, 5,0, 2, 0, -1};
+	static int song_victory_note_length[11] = {6, 1, 3, 1, 1, 1, 1, 1, 3, 1, 9};
+	
+	static int song_hit[1] = {2};
+	static int song_hit_note_length[1] = {4};
+	
 	/* New song, start at the beginning */
     song_placement = 0;
 
@@ -74,8 +80,14 @@ void musicSetSong(int song_pointer)
 			song_length = sizeof(song_victory) / sizeof(int);
 			break;
 		case 1:
+			song = song_intro;
+			song_note_length = song_intro_note_length;
+			song_length = sizeof(song_intro) / sizeof(int);
 			break;
 		case 2:
+			song = song_hit;
+			song_note_length = song_hit_note_length;
+			song_length = sizeof(song_hit) / sizeof(int);
 			break;
 		
 		default:
@@ -89,26 +101,35 @@ void musicSetSong(int song_pointer)
 
 void musicSetFrequency(int note)
 {
-    /*
-     * Clock runs at 14Mhz/sample_size
-     * 14000000/44100 = 317.460317
-     */
+	/* Silence note*/
+	if(note == 0)
+	{
+		buffer[0] = 0;	
+	}
+	else
+	{
+			/*
+			 * Clock runs at 14Mhz/sample_size
+			 * 14000000/44100 = 317.460317
+			 */
 
-    //http://www.phy.mtu.edu/~suits/NoteFreqCalcs.html
-    /* fn = f0 * (a)^n
-     * where
-     * f0 = the frequency of one fixed note which must be defined. A common choice is setting the A above middle C (A4) at f0 = 440 Hz.
-     * n = the number of half steps away from the fixed note you are. If you are at a higher note, n is positive. If you are on a lower note, n is negative.
-     * fn = the frequency of the note n half steps away.
-     */
-    double frequency = A4_FREQ * pow(A_VALUE, note);
+			//http://www.phy.mtu.edu/~suits/NoteFreqCalcs.html
+			/* fn = f0 * (a)^n
+			 * where
+			 * f0 = the frequency of one fixed note which must be defined. A common choice is setting the A above middle C (A4) at f0 = 440 Hz.
+			 * n = the number of half steps away from the fixed note you are. If you are at a higher note, n is positive. If you are on a lower note, n is negative.
+			 * fn = the frequency of the note n half steps away.
+			 */
+			double frequency = A4_FREQ * pow(A_VALUE, note);
 
-    buffer_length = getSoundLen(frequency);
+			buffer_length = getSoundLen(frequency);
 
-    for (int i = 0; i < buffer_length; i++)
-    {
-        buffer[i] = amplitude * (0 + sin(2 * PI * i / buffer_length));
-    }
+			for (int i = 0; i < buffer_length; i++)
+			{
+				buffer[i] = amplitude * (0 + sin(2 * PI * i / buffer_length));
+			}
+
+	}
 
 	buffer_placement = 0;
 }
@@ -120,7 +141,7 @@ int getSoundLen(double freq)
 
 void musicInterrupt()
 {
-    uint16_t sound = buffer[buffer_placement] + 2000;
+    uint16_t sound = buffer[buffer_placement];
     buffer_placement += 1;
 
     //Set sine amplitude
