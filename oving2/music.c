@@ -35,7 +35,7 @@
 #define A_VALUE 1.0594630943592953
 #define PI 3.1415926535897932
 #define A4_FREQ 440
-#define NOTE_LENGTH 400 /* The length of one note. */
+#define NOTE_LENGTH 250 /* The length of one note. */
 
 void musicSetFrequency(int note);
 int getSoundLen(double freq);
@@ -47,7 +47,7 @@ int buffer_length = 0;
 int buffer_placement = 0;
 
 int song[9] = {0, 1, 2, 3, 4, 7, 5, 5, 5};
-int song_note_length[9] = {1, 2, 1, 2, 1, 2, 2, 3, 1}
+int song_note_length[9] = {1, 2, 1, 2, 1, 2, 2, 3, 1};
 
 //int *song;
 int song_placement = 0;
@@ -86,6 +86,8 @@ void musicSetFrequency(int note)
     {
         buffer[i] = amplitude * (0 + sin(2 * PI * i / buffer_length));
     }
+
+	buffer_placement = 0;
 }
 
 int getSoundLen(double freq)
@@ -107,8 +109,9 @@ void musicInterrupt()
     {
         /* Check if we should play the note again */
         note_current_length++;
-        if(note_current_length < song_note_length[buffer_placement] * NOTE_LENGTH)
+        if(note_current_length < song_note_length[song_placement] * NOTE_LENGTH)
             buffer_placement = 0;
+	/* Change note */
         else
         {
                 /* Go to next note */
