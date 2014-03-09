@@ -35,31 +35,54 @@
 #define A_VALUE 1.0594630943592953
 #define PI 3.1415926535897932
 #define A4_FREQ 440
-#define NOTE_LENGTH 250 /* The length of one note. */
+#define NOTE_LENGTH 50 /* The length of one note. */
 
 void musicSetFrequency(int note);
 int getSoundLen(double freq);
 
 uint8_t amplitude = 127;
 
+/* Buffer */
 uint16_t buffer[1024];
 int buffer_length = 0;
 int buffer_placement = 0;
 
-int song[9] = {0, 1, 2, 3, 4, 7, 5, 5, 5};
-int song_note_length[9] = {1, 2, 1, 2, 1, 2, 2, 3, 1};
-
+/* The song*/
 //int *song;
 int song_placement = 0;
 int song_length = 0;
 
+int *song = 0;
+int *song_note_length = 0;
+
+/* Number of times one note is played */
 int note_current_length = 0;
 
-void musicSetSong(int *song_pointer)
+void musicSetSong(int song_pointer)
 {
-    //*song = *song_pointer;
+	static int song_victory[9] = {-7, -7, -2, 3, -7, -7};
+	static int song_victory_note_length[9] = {9, 3, 1, 1, 3, 15};
+
+	/* New song, start at the beginning */
     song_placement = 0;
-    song_length = sizeof(song) / sizeof(int);
+
+	switch(song_pointer)
+	{
+		case 0:
+			song = song_victory;
+			song_note_length = song_victory_note_length;
+			song_length = sizeof(song_victory) / sizeof(int);
+			break;
+		case 1:
+			break;
+		case 2:
+			break;
+		
+		default:
+			song = 0;
+			song_note_length = 0;
+			song_length = 0;
+	}
 
     musicSetFrequency(song[0]);
 }

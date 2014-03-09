@@ -63,7 +63,7 @@ void gpio_handler()
     if(BUTTON_CLICK(*GPIO_IF, 7))
     {
         /* Start timer and set correct song */
-        musicSetSong(song_pointer);
+        musicSetSong(0);
 
         startTimer();
     }
