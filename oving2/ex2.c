@@ -51,7 +51,7 @@ void setupEnergy()
     //*EMU_CTRL = 0;
 
     /* Set deep sleep*/
-    *SCR = 2; //6
+    *SCR = 4; //6
 }
 
 void setupNVIC()

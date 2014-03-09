@@ -56,8 +56,13 @@ void gpio_handler()
         i++;
         return;
     }
+    
+	uint32_t input = *GPIO_PC_DIN;
+   	
+	input = input << 8;
+    input = input ^ 0;
+    *GPIO_PA_DOUT = input;
 
-    uint32_t input = *GPIO_PC_DIN;
     //Haavard bruker GPIO_IF (finne i dokumentasjon)
     // GPIO_IFC skal settes til denne verdien også.
     if(BUTTON_CLICK(*GPIO_IF, 7))
@@ -82,7 +87,4 @@ void gpio_handler()
         startTimer();
     }
     /* Hightlight the pressed led */
-    input = input << 8;
-    input = input ^ 0;
-    *GPIO_PA_DOUT = input;
 }

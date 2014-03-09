@@ -34,5 +34,6 @@ void startTimer()
 void stopTimer()
 {
     *TIMER1_CMD = 2;
+	//__asm("wfi");
 }
 
