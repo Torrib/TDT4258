@@ -3,11 +3,11 @@
 #include "ex2.h"
 
 #include "efm32gg.h"
+#include "constants.h"
 #include "gpio.h"
 #include "timer.h"
 #include "dac.h"
 #include "interrupt_handlers.h"
-#include "music.h"
 
 /*
  * TODO calculate the appropriate sample period for the sound wave(s)
@@ -15,29 +15,24 @@
  * from) runs at 14 MHz by default. Also remember that the timer counter
  * registers are 16 bits.
  */
-/* The period between sound samples, in clock cycles */
-#define   SAMPLE_PERIOD 14000000/44100
 
 /* Your code will start executing here */
 int main(void)
 {
+    /* Enable interrupt handling */
+    setupNVIC();
+
     /* Call the peripheral setup functions */
     setupGPIO();
     setupDAC();
     setupTimer(SAMPLE_PERIOD);
-
-    //Start the timer.
-    //startTimer();
-
-    /* Enable interrupt handling */
-    setupNVIC();
 
     setupEnergy();
 
     /*  for higher energy efficiency, sleep while waiting for interrupts
      * instead of infinite loop for busy-waiting
      */
-	__asm("wfi");
+    __asm("wfi");
 
     return 0;
 }
@@ -50,8 +45,8 @@ void setupEnergy()
     //EM4CTRL, EMVREG, EM2BLOCK = 0, SLEEPDEEP=1
     //*EMU_CTRL = 0;
 
-    /* Set deep sleep*/
-    *SCR = 4; //6
+    /* 2=sleep, 6=deep sleep.*/
+    *SCR = 2;
 }
 
 void setupNVIC()
