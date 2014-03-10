@@ -11,19 +11,18 @@
 
 int main(void)
 {
+	//Setup energy saving measurements
     setupEnergy();
     /* Enable interrupt handling */
     setupNVIC();
-
     /* Call the peripheral setup functions */
     setupGPIO();
 	// Setup the DAC
     setupDAC();
 	//Setup the timer with 14Mhz / 44100
     setupTimer(SAMPLE_PERIOD);
-	//Setup energy saving measurements
 
-	//Enter sleep while waiting for interrupts
+	//Enter sleep mode
     __asm("wfi");
 
     return 0;
@@ -31,15 +30,14 @@ int main(void)
 
 void setupEnergy()
 {
-	//TODO
-    /* Disable RAM blocks*/
+	//*EMU_MEMCTRL = 7; /* Disables SRAM blocks 1-3 */
 
     /* Set EM3 */
     //EM4CTRL, EMVREG, EM2BLOCK = 0, SLEEPDEEP=1
-    //*EMU_CTRL = 0;
+    *EMU_CTRL = 0;
 
     /* 2=sleep, 6=deep sleep.*/
-    *SCR = 4;
+    *SCR = 6;
 }
 
 void setupNVIC()

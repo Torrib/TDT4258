@@ -6,33 +6,6 @@
 #include "timer.h"
 #include "constants.h"
 
-#define C 523
-#define B 494
-#define Bb 466
-#define A 440
-#define Ab 415
-#define G 392
-#define Gb 370
-#define F 349
-#define E 330
-#define Eb 311
-#define D 294
-#define Db 277
-//#define C 262
-
-/*
-    TODO
-        1. Need three songs
-        2. Song referencing from interrupt
-        FIXED 3. Wierd sound at end. How to set no sound?
-        FIXED 4. How to start/ stop timer correctly
-        5. How to avoid gpio_handler to run code when started?
-            Run when specific buttons are pressed instead
-                macro added. Still reacts on interrupts. Still using dirtyfix
-        6. Handle note length correctly
-            Maybe done.. check.
-*/
-
 #define A_VALUE 1.0594630943592953
 #define PI 3.1415926535897932
 #define A4_FREQ 440
@@ -48,8 +21,6 @@ uint16_t buffer[1024];
 int buffer_length = 0;
 int buffer_placement = 0;
 
-/* The song*/
-//int *song;
 int song_placement = 0;
 int song_length = 0;
 
@@ -116,11 +87,6 @@ void musicSetFrequency(int note)
 	}
 	else
 	{
-			/*
-			 * Clock runs at 14Mhz/sample_size
-			 * 14000000/44100 = 317.460317
-			 */
-
 			//http://www.phy.mtu.edu/~suits/NoteFreqCalcs.html
 			/* fn = f0 * (a)^n
 			 * where
@@ -134,7 +100,6 @@ void musicSetFrequency(int note)
 			{
 				buffer[i] = amplitude * (0 + sin(2 * PI * i / buffer_length));
 			}
-
 	}
 
 	buffer_placement = 0;
@@ -169,7 +134,7 @@ void musicInterrupt()
         note_current_length++;
         if(note_current_length < song_note_length[song_placement] * NOTE_LENGTH)
             buffer_placement = 0;
-	/* Change note */
+		/* Change note */
         else
         {
             /* Go to next note */
@@ -180,15 +145,18 @@ void musicInterrupt()
             if(song_placement < song_length)
             {
                 musicSetFrequency(song[song_placement]);
-                //TODO Fetch new note_length
             }
             /* Song is done */
             else
             {
+				/* Reset data */ 
+				song = 0;
+				song_note_length = 0;
+				song_length = 0;
+				buffer_placement = 0;
                 /* Stop the timer */
                 stopTimer();
             }
         }
     }
 }
-
