@@ -30,14 +30,14 @@ int main(void)
 
 void setupEnergy()
 {
-	//*EMU_MEMCTRL = 7; /* Disables SRAM blocks 1-3 */
+	//*EMU_MEMCTRL = 4; /* Disables SRAM blocks 1-3 */
 
     /* Set EM3 */
     //EM4CTRL, EMVREG, EM2BLOCK = 0, SLEEPDEEP=1
     *EMU_CTRL = 0;
 
     /* 2=sleep, 6=deep sleep.*/
-    *SCR = 6;
+    *SCR = 4;
 }
 
 void setupNVIC()
