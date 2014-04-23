@@ -2,3 +2,5 @@
 *.o
 *.bin
 *.elf
+*.xcodeproj
+*.DS_Store
