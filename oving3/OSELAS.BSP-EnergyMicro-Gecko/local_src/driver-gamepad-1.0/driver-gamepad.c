@@ -17,9 +17,10 @@
 #include <asm/uaccess.h>
 #include <asm/siginfo.h>
 
+
 #include "efm32gg.h"
 
-#define NAME "Gamepad Driver"
+#define NAME "gamepad1337"
 
 typedef unsigned int uint32_t;
 typedef unsigned short uint16_t;
@@ -38,11 +39,11 @@ static irqreturn_t irq_handler(int irq, void *dummy, struct pt_regs * regs);
 
 //File operation functions
 static struct file_operations driver_fops = {
-	.owner = THIS_MODULE,
-	.read = driver_read,
-	.write = driver_write,
-	.open = driver_open,
-	.release = driver_release
+    .owner = THIS_MODULE,
+    .read = driver_read,
+    .write = driver_write,
+    .open = driver_open,
+    .release = driver_release
 };
 
 //Gamepad driver
@@ -54,8 +55,13 @@ void __iomem *gpio;
 char output;
 struct task_struct *task;
 
+/** Class for userspace /dev/NAME file */
+struct class *cl;
+
 static int __init driver_init(void)
 {
+
+
 	//Get device number
 	alloc_chrdev_region(&devicenumber, 0, 1, NAME);
 
@@ -87,6 +93,11 @@ static int __init driver_init(void)
 
 	printk(KERN_INFO "%s loaded... Major number is %d\n", NAME, MAJOR(devicenumber));
 
+	/* Make the userpace driver file. */
+    //Create file based on driver name
+    cl = class_create(THIS_MODULE, NAME);
+    device_create(cl, NULL, devicenumber, NULL, MAJOR);
+
 	return 0;
 }
 
@@ -113,14 +124,14 @@ uint32_t read_register(uint32_t offset)
 
 static int driver_open (struct inode *inode, struct file *filp)
 {
-	printk(KERN_INFO "%s opened\n", NAME);
-	return 0;
+    printk(KERN_INFO "%s opened\n", NAME);
+    return 0;
 }
 
 static int driver_release (struct inode *inode, struct file *filp)
 {
-	printk(KERN_INFO "%s closed\n", NAME);
-	return 0;
+    printk(KERN_INFO "%s closed\n", NAME);
+    return 0;
 }
 
 static ssize_t driver_read (struct file *filp, char __user *buff, size_t count, loff_t *offp)
