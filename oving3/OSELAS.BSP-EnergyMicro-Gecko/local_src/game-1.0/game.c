@@ -7,6 +7,8 @@
 #include <stdint.h>
 #include <fcntl.h>
 
+#include <tictactoe.h>
+
 int framebuffer;
 int gamepad;
 
@@ -29,7 +31,7 @@ int main(int argc, char *argv[])
 	}
 
 	gamepad = open("/dev/gamepad", O_RDWR);
-	if(gamepad < 0) 
+	if(gamepad < 0)
 	{
 		printf("Error: opening gamepad file\n");
 		return 1;
@@ -54,11 +56,17 @@ int main(int argc, char *argv[])
 	}
 
 	//game_stuff();
+
+    // The game begins!
+    init_tictactoe();
 }
 
 void interrupt_handler(int n, siginfo_t *info, void *unused) {
 	printf("Interrupt!\n");
 	//buttons = (uint8_t) ~(info->si_int);
+
+    //Propagate the event here. [0 4] Up, down, left, right, click
+    tictactoe_event(0);
 }
 
 void game_stuff(void)
