@@ -172,15 +172,15 @@ static irqreturn_t irq_handler(int irq, void *dev_id, struct pt_regs * regs)
 	int ret = 0;
 	output = (uint8_t) ~buttons;
 	/* send the signal */
-	/*memset(&info, 0, sizeof(struct siginfo));
-	info.si_signo = 42;
+	memset(&info, 0, sizeof(struct siginfo));
+	info.si_signo = 5;
 	info.si_code = SI_QUEUE;	
 	info.si_int = output;
-	ret = send_sig_info(42, &info, t);
+	ret = send_sig_info(5, &info, t);
 	if (ret < 0) {
 		printk("error sending signal\n");
 		return ret;
-	}*/
+	}
 
 	printk(output);
 
