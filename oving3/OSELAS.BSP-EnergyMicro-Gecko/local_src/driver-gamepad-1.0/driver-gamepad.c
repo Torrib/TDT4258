@@ -120,7 +120,7 @@ void write_register(uint32_t offset, uint32_t value)
 
 uint32_t read_register(uint32_t offset)
 {
-    return *(volatile uint32_t *) ((uint32_t) gpio + offset); 
+    return *(volatile uint32_t *) ((uint32_t) gpio + offset);
 }
 
 static int driver_open (struct inode *inode, struct file *filp)
@@ -174,7 +174,7 @@ static irqreturn_t irq_handler(int irq, void *dev_id, struct pt_regs * regs)
     /* send the signal */
     memset(&info, 0, sizeof(struct siginfo));
     info.si_signo = 5;
-    info.si_code = SI_QUEUE;    
+    info.si_code = SI_QUEUE;
     info.si_int = output;
     ret = send_sig_info(5, &info, t);
     if (ret < 0) {
