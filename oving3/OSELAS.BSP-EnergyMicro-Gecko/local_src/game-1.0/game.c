@@ -15,7 +15,7 @@ static void interrupt_handler(int, siginfo_t*, void*);
 
 int main(int argc, char *argv[])
 {
-	printf("Starting game");
+	printf("Starting game\n");
 
 	//Open the framebuffer file
 	framebuffer = open("/dev/fb0", O_RDWR);
