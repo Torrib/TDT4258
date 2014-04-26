@@ -136,7 +136,7 @@ static ssize_t driver_write (struct file *filp, const char __user *buff, size_t 
 	sscanf(pid_string, "%d", &pid);
 
 	rcu_read_lock();
-	t = find_task_by_pid_type(PIDTYPE_PID, pid);  //find the task_struct associated with this pid
+	t = pid_task(find_pid_ns(pid, &init_pid_ns), PIDTYPE_PID);
 	if(t == NULL){
 		printk("no such pid\n");
 		rcu_read_unlock();
