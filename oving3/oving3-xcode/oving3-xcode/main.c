@@ -8,6 +8,7 @@
 
 #include <stdio.h>
 
+// Prototypes
 void initializeBoard(char[][3]);
 void printBoard(char[][3]);
 int hasWon(char[][3], int hasTurn);
@@ -22,7 +23,7 @@ int main(int argc, const char * argv[])
     int play = 1;
     int column, row;
     char board[3][3];
-    
+
     initializeBoard(board);
     while (play == 1) {
         while (hasTurn == 1) {
@@ -31,15 +32,15 @@ int main(int argc, const char * argv[])
             scanf("%d", &column);
             printf("Player 1 - Choose row 0 - 2 :\n");
             scanf("%d", &row);
-            
+
             //Check if the column and row is allowed
             //Should be in a method
-            
+
             if(moveAllowed(board, &column, &row) == 1)
                 board[column][row] = 'X';
             else
                 printf("Column or row not valid - try again.\n");
-                
+
             //Check if player 1 won
             if (hasWon(board,hasTurn) == 1){
                 printf("%s", "Player 1 won!");
@@ -48,22 +49,22 @@ int main(int argc, const char * argv[])
             else
                 hasTurn = 2;
         }
-        
+
         //Do the same for player two - is there a way to do this without the loops?
-        
+
         while (hasTurn == 2) {
             printBoard(board);
             printf("Player 2 - Choose column 0 - 2 :\n");
             scanf("%d", &column);
             printf("Player 2 - Choose row 0 - 2 :\n");
             scanf("%d", &row);
-            
+
             //Check if the column and row is allowed
             if(moveAllowed(board, &column, &row) == 1)
                 board[column][row] = '0';
             else
                 printf("Column or row not valid - try again.\n");
-            
+
             //Check if player 2 has won
             if (hasWon(board,hasTurn) == 1){
                 printf("%s", "Player 1 won!");
@@ -71,10 +72,10 @@ int main(int argc, const char * argv[])
             }
             else
                 hasTurn = 1;
-  
+
         }
     }
-    
+
      return 0;
 }
 
@@ -83,16 +84,17 @@ int moveAllowed(char board[][3], int *column,int *row){
         || *column < 0
         || *row > 2
         || *row < 0)) {
-        
+
         return 0;
     }
-    
+
     if(board[*column][*row] == 'X'
        || board[*column][*row] == '0'){
         return 0;
     }
+
     return 1;
-};
+}
 
 int hasWon(char board[][3], int hasTurn){
     //Check rows
@@ -109,21 +111,19 @@ int hasWon(char board[][3], int hasTurn){
             return 1;
         }
     }
-    
+
     if((board[0][0] == 'X') && (board[0][0] == board[1][1]) && (board[1][1] == board[2][2])){
         printf("%s", "Player 1 won the diagonal! \n");
         return 1;
     }
-    
+
     if((board[0][2] == 'X') && (board[0][2] == board[1][1]) && (board[1][1] == board[2][0])){
         printf("%s", "Player 1 won! \n");
         return 1;
     }
-    
     else
         return 0;
-};
-
+}
 
 void initializeBoard(char board[][3]){
     for (int x = 0; x < 3; x++) {
@@ -131,8 +131,7 @@ void initializeBoard(char board[][3]){
             board[x][y] = '.';
         }
     }
-
-};
+}
 
 void printBoard(char board[][3]){
     //Use this to add things in the buffer?
@@ -141,5 +140,5 @@ void printBoard(char board[][3]){
             printf("%c", board[i][x]);
         }
         printf("\n");
-    }};
-
+    }
+}
