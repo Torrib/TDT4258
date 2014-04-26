@@ -2,10 +2,14 @@
 #include <stdlib.h>
 #include <linux/fb.h>
 #include <sys/mman.h>
-#include <signal.h>
 #include <sys/stat.h>
-#include <stdint.h>
 #include <fcntl.h>
+#include <unistd.h>
+#include <sys/ioctl.h>
+#include <stdint.h>
+#include <unistd.h>
+#include <string.h>
+#include <signal.h>
 
 #include <tictactoe.h>
 
@@ -18,6 +22,8 @@ static void interrupt_handler(int, siginfo_t*, void*);
 int main(int argc, char *argv[])
 {
 	printf("Starting game\n");
+
+	char pid_buf[10];
 
 	//Open the framebuffer file
 	framebuffer = open("/dev/fb0", O_RDWR);
@@ -49,6 +55,8 @@ int main(int argc, char *argv[])
 	sign.sa_flags = SA_SIGINFO;
 	sigaction(42, &sign, NULL);
 
+	sprintf(pid_buf, "%d", getpid());
+	write(gamepad, pid_buf, strlen(pid_buf)
 
 	while(1)
 	{
