@@ -171,6 +171,8 @@ static ssize_t driver_write(struct file *filp, const char __user *buff, size_t c
     return count;
 }
 
+uint8_t opened = 0;
+
 static irqreturn_t irq_handler(int irq, void *dev_id, struct pt_regs * regs)
 {
     uint32_t buttons = read_register(GPIO_PC_DIN);
@@ -183,7 +185,7 @@ static irqreturn_t irq_handler(int irq, void *dev_id, struct pt_regs * regs)
 	info.si_code = SI_QUEUE;	
 	info.si_int = buttons;
 	if(opened)
-		ret = send_sig_info(42, &info, t);
+		ret = send_sig_info(42, &info, task);
 	if (ret < 0) {
 		printk("error sending signal\n");
 		return ret;
