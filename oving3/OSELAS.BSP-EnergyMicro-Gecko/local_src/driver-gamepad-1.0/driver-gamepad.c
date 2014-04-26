@@ -125,25 +125,25 @@ static ssize_t driver_read (struct file *filp, char __user *buff, size_t count, 
 
 static ssize_t driver_write (struct file *filp, const char __user *buff, size_t count, loff_t *offp)
 {
-	char pid_string[10];
-	int pid = 0;
-	int ret;
+	// char pid_string[10];
+	// int pid = 0;
+	// int ret;
 
-	/* read the value from user space */
-	if(count > 10)
-		return -EINVAL;
-	copy_from_user(pid_string, buff, count);
-	sscanf(pid_string, "%d", &pid);
+	// /* read the value from user space */
+	// if(count > 10)
+	// 	return -EINVAL;
+	// copy_from_user(pid_string, buff, count);
+	// sscanf(pid_string, "%d", &pid);
 
-	rcu_read_lock();
-	t = find_task_by_pid_type(PIDTYPE_PID, pid);  //find the task_struct associated with this pid
-	if(t == NULL){
-		printk("no such pid\n");
-		rcu_read_unlock();
-		return -ENODEV;
-	}
-	rcu_read_unlock();
-	return count;
+	// rcu_read_lock();
+	// t = find_task_by_pid_type(PIDTYPE_PID, pid);  //find the task_struct associated with this pid
+	// if(t == NULL){
+	// 	printk("no such pid\n");
+	// 	rcu_read_unlock();
+	// 	return -ENODEV;
+	// }
+	// rcu_read_unlock();
+	// return count;
 }
 
 void write_register(uint32_t offset, uint32_t value)
