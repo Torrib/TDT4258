@@ -125,25 +125,25 @@ static ssize_t driver_read (struct file *filp, char __user *buff, size_t count, 
 
 static ssize_t driver_write (struct file *filp, const char __user *buff, size_t count, loff_t *offp)
 {
-	// char pid_string[10];
-	// int pid = 0;
-	// int ret;
+	char pid_string[10];
+	int pid = 0;
+	int ret;
 
-	// /* read the value from user space */
-	// if(count > 10)
-	// 	return -EINVAL;
-	// copy_from_user(pid_string, buff, count);
-	// sscanf(pid_string, "%d", &pid);
+	/* read the value from user space */
+	if(count > 10)
+		return -EINVAL;
+	copy_from_user(pid_string, buff, count);
+	sscanf(pid_string, "%d", &pid);
 
-	// rcu_read_lock();
-	// t = find_task_by_pid_type(PIDTYPE_PID, pid);  //find the task_struct associated with this pid
-	// if(t == NULL){
-	// 	printk("no such pid\n");
-	// 	rcu_read_unlock();
-	// 	return -ENODEV;
-	// }
-	// rcu_read_unlock();
-	// return count;
+	rcu_read_lock();
+	t = find_task_by_pid_type(PIDTYPE_PID, pid);  //find the task_struct associated with this pid
+	if(t == NULL){
+		printk("no such pid\n");
+		rcu_read_unlock();
+		return -ENODEV;
+	}
+	rcu_read_unlock();
+	return count;
 }
 
 void write_register(uint32_t offset, uint32_t value)
@@ -163,15 +163,17 @@ static irqreturn_t irq_handler(int irq, void *dev_id, struct pt_regs * regs)
 	int ret;
 	output = (uint8_t) ~buttons;
 	/* send the signal */
-	memset(&info, 0, sizeof(struct siginfo));
-	info.si_signo = 42;
-	info.si_code = SI_QUEUE;	
-	info.si_int = output;
-	ret = send_sig_info(42, &info, t);
-	if (ret < 0) {
-		printk("error sending signal\n");
-		return ret;
-	}
+	// memset(&info, 0, sizeof(struct siginfo));
+	// info.si_signo = 42;
+	// info.si_code = SI_QUEUE;	
+	// info.si_int = output;
+	// ret = send_sig_info(42, &info, t);
+	// if (ret < 0) {
+	// 	printk("error sending signal\n");
+	// 	return ret;
+	// }
+
+	printf(output);
 
 	write_register(GPIO_IFC, 0xFFFF);
 	return IRQ_HANDLED;
@@ -180,5 +182,5 @@ static irqreturn_t irq_handler(int irq, void *dev_id, struct pt_regs * regs)
 module_init(driver_init);
 module_exit(driver_exit);
 
-MODULE_DESCRIPTION("Simple driver for TDT4258 Gamepad");
-MODULE_LICENSE("GPL");
+//MODULE_DESCRIPTION("Gamepad driver");
+//MODULE_LICENSE("GPL");
