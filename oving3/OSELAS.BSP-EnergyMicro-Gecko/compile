@@ -1,0 +1,8 @@
+#!/bin/sh
+
+ptxdist clean game
+ptxdist clean driver-gamepad
+ptxdist compile game
+ptxdist compile driver-gamepad
+ptxdist images
+ptxdist test flash-rootfs
