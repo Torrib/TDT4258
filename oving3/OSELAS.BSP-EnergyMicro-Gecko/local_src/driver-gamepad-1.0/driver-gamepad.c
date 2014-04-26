@@ -182,5 +182,5 @@ static irqreturn_t irq_handler(int irq, void *dev_id, struct pt_regs * regs)
 module_init(driver_init);
 module_exit(driver_exit);
 
-//MODULE_DESCRIPTION("Gamepad driver");
-//MODULE_LICENSE("GPL");
+MODULE_DESCRIPTION("Gamepad driver");
+MODULE_LICENSE("GPL");
