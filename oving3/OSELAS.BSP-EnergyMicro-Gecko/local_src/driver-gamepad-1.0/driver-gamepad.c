@@ -175,6 +175,7 @@ uint8_t opened = 0;
 
 static irqreturn_t irq_handler(int irq, void *dev_id, struct pt_regs * regs)
 {
+	printf("Interrupt triggered!");
     uint32_t buttons = read_register(GPIO_PC_DIN);
 	struct siginfo info;
 	int ret = 0;
