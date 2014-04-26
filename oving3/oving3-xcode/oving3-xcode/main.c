@@ -10,25 +10,23 @@
 
 void initializeBoard(char[][3]);
 void printBoard(char[][3]);
-int hasWon();
+int hasWon(char[][3], int hasTurn);
+int moveAllowed(char[][3], int *column,int *row);
 
-//Here comes the ulgiest thing in the world:
 int main(int argc, const char * argv[])
 {
     //Interaction with the user (From the driver) Use the FILE pointer?
-    
-    //initializeBoard();
+
     //hasTurn is 1 when it is player 1, and 2 when it is player two
     int hasTurn = 1;
     int play = 1;
-    int column, row, x, y;
+    int column, row;
     char board[3][3];
     
     initializeBoard(board);
-    printBoard(board);
-    
     while (play == 1) {
         while (hasTurn == 1) {
+            printBoard(board);
             printf("Player 1 - Choose column 0 - 2 :\n");
             scanf("%d", &column);
             printf("Player 1 - Choose row 0 - 2 :\n");
@@ -36,124 +34,97 @@ int main(int argc, const char * argv[])
             
             //Check if the column and row is allowed
             //Should be in a method
-            if((column > 2
-                || column < 0
-                || row > 2
-                || row < 0)) {
-                   printf("Column or row not valid - try again.\n");
-               }
             
-            if(board[column][row] == 'X'
-               || board[column][row] == '0'){
-                printf("Column or row not valid - try again.\n");
-                break;
-            }
-            //Set the right field to "X"
-            else
+            if(moveAllowed(board, &column, &row) == 1)
                 board[column][row] = 'X';
-            
-            
-            //Check if player 1 has won, if not - switch to next player. This is ugly, need fixing. And methods - glorious methods.
-            
-            //Check rows
-            for (x = 0; x < 3; x++) {
-                if ((board[x][0] == 'X') && (board[x][0] == board[x][1]) && (board[x][1] == board[x][2])) {
-                    printf("%s", "Player 1 won the row \n");
-                    play = 0;
-                }
-            }
-            //Check columns
-            for (y = 0; y < 3; y++) {
-                if ((board[0][y] == 'X') && (board[0][y] == board[1][y]) && (board[1][y] == board[2][y])) {
-                    printf("%s", "Player 1 won the column! \n");
-                    play = 0;
-                }
-            }
-            
-            if((board[0][0] == 'X') && (board[0][0] == board[1][1]) && (board[1][1] == board[2][2])){
-                printf("%s", "Player 1 won the diagonal! \n");
+            else
+                printf("Column or row not valid - try again.\n");
+                
+            //Check if player 1 won
+            if (hasWon(board,hasTurn) == 1){
+                printf("%s", "Player 1 won!");
                 play = 0;
             }
-            
-            if((board[0][2] == 'X') && (board[0][2] == board[1][1]) && (board[1][1] == board[2][0])){
-                printf("%s", "Player 1 won! \n");
-                play = 0;
-            }
-            
-            hasTurn = 2;
-            
+            else
+                hasTurn = 2;
         }
         
-        //Player two does exactly the same as player one. Shit this is so ugly
+        //Do the same for player two - is there a way to do this without the loops?
+        
         while (hasTurn == 2) {
+            printBoard(board);
             printf("Player 2 - Choose column 0 - 2 :\n");
             scanf("%d", &column);
             printf("Player 2 - Choose row 0 - 2 :\n");
             scanf("%d", &row);
             
             //Check if the column and row is allowed
-            //Should be in a method
-            if((column > 2
-               || column < 0
-               || row > 2
-               || row < 0)) {
-               printf("Column or row not valid - try again.\n");
-            }
-            
-            //Check if the spot is already taken
-            
-            if(board[column][row] == 'X'
-               || board[column][row] == '0'){
-                printf("Column or row not valid - try again.\n");
-                break;
-            }
-            //Set the right field to "0"
-            else
+            if(moveAllowed(board, &column, &row) == 1)
                 board[column][row] = '0';
+            else
+                printf("Column or row not valid - try again.\n");
             
-            
-            //Check if player 2 has won, if not - switch to next player. This is ugly, need fixing. And methods - glorious methods.
-            
-            
-            //Check rows
-            for (x = 0; x < 3; x++) {
-                if ((board[x][0] == '0') && (board[x][0] == board[x][1]) && (board[x][1] == board[x][2])) {
-                    printf("%s", "Player 2 won! \n");
-                    play = 0;
-                }
-            }
-            //Check columns
-            for (y = 0; y < 3; y++) {
-                if ((board[0][y] == '0') && (board[0][y] == board[1][y]) && (board[1][y] == board[2][y])) {
-                    printf("%s", "Player 2 won! \n");
-                    play = 0;
-                }
-            }
-            
-            if((board[0][0] == '0') && (board[0][0] == board[1][1]) && (board[1][1] == board[2][2])){
-                printf("%s", "Player 2 won! \n");
+            //Check if player 2 has won
+            if (hasWon(board,hasTurn) == 1){
+                printf("%s", "Player 1 won!");
                 play = 0;
             }
-            
-            if((board[0][2] == '0') && (board[0][2] == board[1][1]) && (board[1][1] == board[2][0])){
-                printf("%s", "Player 2 won! \n");
-                play = 0;
-            }
-            
-            hasTurn = 1;
-            
+            else
+                hasTurn = 1;
+  
         }
     }
     
      return 0;
 }
 
-
-/*int hasWon(int hasTurn){
+int moveAllowed(char board[][3], int *column,int *row){
+    if((*column > 2
+        || *column < 0
+        || *row > 2
+        || *row < 0)) {
+        
+        return 0;
+    }
     
-};*/
+    if(board[*column][*row] == 'X'
+       || board[*column][*row] == '0'){
+        return 0;
+    }
+    return 1;
+};
 
- 
+int hasWon(char board[][3], int hasTurn){
+    //Check rows
+    for (int x = 0; x < 3; x++) {
+        if ((board[x][0] == 'X') && (board[x][0] == board[x][1]) && (board[x][1] == board[x][2])) {
+            printf("%s", "Player 1 won the row \n");
+            return 1;
+        }
+    }
+    //Check columns
+    for (int y = 0; y < 3; y++) {
+        if ((board[0][y] == 'X') && (board[0][y] == board[1][y]) && (board[1][y] == board[2][y])) {
+            printf("%s", "Player 1 won the column! \n");
+            return 1;
+        }
+    }
+    
+    if((board[0][0] == 'X') && (board[0][0] == board[1][1]) && (board[1][1] == board[2][2])){
+        printf("%s", "Player 1 won the diagonal! \n");
+        return 1;
+    }
+    
+    if((board[0][2] == 'X') && (board[0][2] == board[1][1]) && (board[1][1] == board[2][0])){
+        printf("%s", "Player 1 won! \n");
+        return 1;
+    }
+    
+    else
+        return 0;
+};
+
+
 void initializeBoard(char board[][3]){
     for (int x = 0; x < 3; x++) {
         for (int y = 0; y < 3; y++) {
@@ -164,6 +135,7 @@ void initializeBoard(char board[][3]){
 };
 
 void printBoard(char board[][3]){
+    //Use this to add things in the buffer?
     for (int i = 0; i < 3; i++) {
         for (int x = 0; x < 3; x++) {
             printf("%c", board[i][x]);
