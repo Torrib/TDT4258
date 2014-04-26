@@ -174,24 +174,23 @@ static ssize_t driver_write(struct file *filp, const char __user *buff, size_t c
 static irqreturn_t irq_handler(int irq, void *dev_id, struct pt_regs * regs)
 {
     uint32_t buttons = read_register(GPIO_PC_DIN);
-    struct siginfo info;
-    int ret = 0;
-    output = (uint8_t) ~buttons;
-    /* send the signal */
-    memset(&info, 0, sizeof(struct siginfo));
-    info.si_signo = 42;
-    info.si_code = SI_QUEUE;
-    info.si_int = output;
-    ret = send_sig_info(42, &info, task);
-    if (ret < 0) {
-        printk("error sending signal\n");
-        return ret;
-    }
+	struct siginfo info;
+	int ret = 0;
+	write_register(GPIO_IFC, 0xFFFF);
+	/* send the signal */
+	memset(&info, 0, sizeof(struct siginfo));
+	info.si_signo = 42;
+	info.si_code = SI_QUEUE;	
+	info.si_int = buttons;
+	if(opened)
+		ret = send_sig_info(42, &info, t);
+	if (ret < 0) {
+		printk("error sending signal\n");
+		return ret;
+	}
 
-    //printk(output);
 
-    write_register(GPIO_IFC, 0xFFFF);
-    return IRQ_HANDLED;
+	return IRQ_HANDLED;
 }
 
 module_init(my_driver_init);
