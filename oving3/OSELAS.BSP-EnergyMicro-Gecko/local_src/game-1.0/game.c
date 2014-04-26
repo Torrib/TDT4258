@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 	struct sigaction sign;
 	sign.sa_sigaction = interrupt_handler;
 	sign.sa_flags = SA_SIGINFO;
-	sigaction(5, &sign, NULL);
+	sigaction(42, &sign, NULL);
 
 
 	while(1)
