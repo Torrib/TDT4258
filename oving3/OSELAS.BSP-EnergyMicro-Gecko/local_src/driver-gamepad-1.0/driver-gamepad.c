@@ -60,8 +60,6 @@ struct class *cl;
 
 static int __init driver_init(void)
 {
-
-
 	//Get device number
 	alloc_chrdev_region(&devicenumber, 0, 1, NAME);
 
@@ -96,7 +94,7 @@ static int __init driver_init(void)
 	/* Make the userpace driver file. */
     //Create file based on driver name
     cl = class_create(THIS_MODULE, NAME);
-    device_create(cl, NULL, devicenumber, NULL, MAJOR);
+    device_create(cl, NULL, devicenumber, NULL, NAME);
 
 	return 0;
 }
@@ -171,7 +169,7 @@ static irqreturn_t irq_handler(int irq, void *dev_id, struct pt_regs * regs)
 	int ret = 0;
 	output = (uint8_t) ~buttons;
 	/* send the signal */
-	memset(&info, 0, sizeof(struct siginfo));
+	/*memset(&info, 0, sizeof(struct siginfo));
 	info.si_signo = 42;
 	info.si_code = SI_QUEUE;	
 	info.si_int = output;
@@ -179,7 +177,7 @@ static irqreturn_t irq_handler(int irq, void *dev_id, struct pt_regs * regs)
 	if (ret < 0) {
 		printk("error sending signal\n");
 		return ret;
-	}
+	}*/
 
 	printk(output);
 
@@ -191,4 +189,4 @@ module_init(driver_init);
 module_exit(driver_exit);
 
 MODULE_DESCRIPTION("Gamepad driver");
-MODULE_LICENSE("Apache 2.0");
+MODULE_LICENSE("GPL");
