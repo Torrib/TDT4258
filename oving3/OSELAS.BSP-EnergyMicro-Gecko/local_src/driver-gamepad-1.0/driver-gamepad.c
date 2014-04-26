@@ -179,16 +179,16 @@ static irqreturn_t irq_handler(int irq, void *dev_id, struct pt_regs * regs)
     output = (uint8_t) ~buttons;
     /* send the signal */
     memset(&info, 0, sizeof(struct siginfo));
-    info.si_signo = 5;
+    info.si_signo = 42;
     info.si_code = SI_QUEUE;
     info.si_int = output;
-    ret = send_sig_info(5, &info, t);
+    ret = send_sig_info(42, &info, task);
     if (ret < 0) {
         printk("error sending signal\n");
         return ret;
     }
 
-    printk(output);
+    //printk(output);
 
     write_register(GPIO_IFC, 0xFFFF);
     return IRQ_HANDLED;
