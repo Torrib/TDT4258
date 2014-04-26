@@ -5,11 +5,13 @@
 #include <signal.h>
 #include <sys/stat.h>
 #include <stdint.h>
+#include <fcntl.h>
 
 int framebuffer;
 int gamepad;
 
 static void game_stuff(void);
+static void interrupt_handler(int, void);
 
 int main(int argc, char *argv[])
 {
@@ -55,7 +57,7 @@ int main(int argc, char *argv[])
 }
 
 void interrupt_handler(int n, siginfo_t *info, void *unused) {
-	printf("Interrupt!\n")
+	printf("Interrupt!\n");
 	//buttons = (uint8_t) ~(info->si_int);
 }
 
