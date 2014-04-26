@@ -4,17 +4,18 @@
 #include <linux/init.h>
 #include <linux/moduleparam.h>
 #include <linux/kdev_t.h>
+#include <linux/signal.h>
+#include <linux/interrupt.h>
 #include <linux/fs.h>
 #include <linux/cdev.h>
 #include <linux/ioport.h>
 #include <linux/types.h>
+#include <linux/rcupdate.h>
+#include <linux/sched.h>
+
 #include <asm/io.h>
 #include <asm/uaccess.h>
-#include <linux/signal.h>
-#include <linux/interrupt.h>
-#include <asm/siginfo.h>	//siginfo
-#include <linux/rcupdate.h>	//rcu_read_lock
-#include <linux/sched.h>	//find_task_by_pid_type
+#include <asm/siginfo.h>
 
 #include "efm32gg.h"
 
@@ -44,17 +45,15 @@ static struct file_operations driver_fops = {
 	.release = driver_release
 };
 
-//This driver
-static struct cdev driver_cdev = {};
-
-//Device number
+//Gamepad driver
+static struct cdev gamepad_cdev = {};
 dev_t devicenumber = 0;
 
 //GPIO memory pointer
 void __iomem *gpio;
-
 char output;
-struct task_struct *t;
+struct task_struct *task;
+
 static int __init driver_init(void)
 {
 	//Get device number
@@ -82,9 +81,9 @@ static int __init driver_init(void)
 	request_irq(18, irq_handler, 0, NAME, NULL);
 
 	//Register driver
-	cdev_init(&driver_cdev, &driver_fops);
-	driver_cdev.owner = THIS_MODULE;
-	cdev_add(&driver_cdev, devicenumber, 1);
+	cdev_init(&gamepad_cdev, &driver_fops);
+	gamepad_cdev.owner = THIS_MODULE;
+	cdev_add(&gamepad_cdev, devicenumber, 1);
 
 	printk(KERN_INFO "%s loaded... Major number is %d\n", NAME, MAJOR(devicenumber));
 
@@ -93,13 +92,23 @@ static int __init driver_init(void)
 
 static void __exit driver_exit(void)
 {
-	cdev_del(&driver_cdev);
+	cdev_del(&gamepad_cdev);
 	iounmap(gpio);
 	release_mem_region(GPIO_BASE, GPIO_SIZE);
 	unregister_chrdev_region(devicenumber, 1);
 	free_irq(17, NULL);
 	free_irq(18, NULL);
 	printk(KERN_INFO "%s unloaded...", NAME);
+}
+
+void write_register(uint32_t offset, uint32_t value)
+{
+	*(volatile uint32_t *) ((uint32_t) gpio + offset) = value;
+}
+
+uint32_t read_register(uint32_t offset)
+{
+	return *(volatile uint32_t *) ((uint32_t) gpio + offset); 
 }
 
 static int driver_open (struct inode *inode, struct file *filp)
@@ -116,62 +125,50 @@ static int driver_release (struct inode *inode, struct file *filp)
 
 static ssize_t driver_read (struct file *filp, char __user *buff, size_t count, loff_t *offp)
 {
-	//Return button state
-	if (count == 0)
-		return 0;
-	copy_to_user(buff, &output, 1);
-	return 1;
+	return count;
 }
 
 static ssize_t driver_write (struct file *filp, const char __user *buff, size_t count, loff_t *offp)
 {
-	char pid_string[10];
+	char pid_string[5];
 	int pid = 0;
-	int ret;
+
+	if(count > 5)
+		return -1;
 
 	/* read the value from user space */
-	if(count > 10)
-		return -EINVAL;
+
+	//Copy input from userspace to local buffer
 	copy_from_user(pid_string, buff, count);
 	sscanf(pid_string, "%d", &pid);
 
 	rcu_read_lock();
-	t = pid_task(find_pid_ns(pid, &init_pid_ns), PIDTYPE_PID);
-	if(t == NULL){
-		printk("no such pid\n");
+	task = pid_task(find_pid_ns(pid, &init_pid_ns), PIDTYPE_PID);
+	if(task == NULL){
+		printk("Error: Could not find the task with pid: %d\n", pid);
 		rcu_read_unlock();
-		return -ENODEV;
+		return -1;
 	}
 	rcu_read_unlock();
 	return count;
-}
-
-void write_register(uint32_t offset, uint32_t value)
-{
-	*(volatile uint32_t *) ((uint32_t) gpio + offset) = value;
-}
-
-uint32_t read_register(uint32_t offset)
-{
-	return *(volatile uint32_t *) ((uint32_t) gpio + offset); 
 }
 
 static irqreturn_t irq_handler(int irq, void *dev_id, struct pt_regs * regs)
 {
 	uint32_t buttons = read_register(GPIO_PC_DIN);
 	struct siginfo info;
-	int ret;
+	int ret = 0;
 	output = (uint8_t) ~buttons;
 	/* send the signal */
-	// memset(&info, 0, sizeof(struct siginfo));
-	// info.si_signo = 42;
-	// info.si_code = SI_QUEUE;	
-	// info.si_int = output;
-	// ret = send_sig_info(42, &info, t);
-	// if (ret < 0) {
-	// 	printk("error sending signal\n");
-	// 	return ret;
-	// }
+	memset(&info, 0, sizeof(struct siginfo));
+	info.si_signo = 42;
+	info.si_code = SI_QUEUE;	
+	info.si_int = output;
+	ret = send_sig_info(42, &info, t);
+	if (ret < 0) {
+		printk("error sending signal\n");
+		return ret;
+	}
 
 	printk(output);
 
@@ -183,4 +180,4 @@ module_init(driver_init);
 module_exit(driver_exit);
 
 MODULE_DESCRIPTION("Gamepad driver");
-MODULE_LICENSE("GPL");
+MODULE_LICENSE("Apache 2.0");
