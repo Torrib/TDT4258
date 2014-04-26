@@ -8,7 +8,7 @@
 
 #include <stdio.h>
 
-char* initializeBoard();
+void initializeBoard(char[][3]);
 void printBoard(char[][3]);
 int hasWon();
 
@@ -23,17 +23,8 @@ int main(int argc, const char * argv[])
     int play = 1;
     int column, row, x, y;
     char board[3][3];
-    //char* boardPointer[3];
     
-    //Initialize board, should be in a method
-    for (x = 0; x < 3; x++) {
-        for (y = 0; y < 3; y++) {
-            board[x][y] = '.';
-        }
-    }
-    
-    *board = initializeBoard();
-    
+    initializeBoard(board);
     printBoard(board);
     
     while (play == 1) {
@@ -163,15 +154,13 @@ int main(int argc, const char * argv[])
 };*/
 
  
-char* initializeBoard(){
-    char board[3][3];
-    
-    for (int i = 0; i < 2; i++) {
-        for (int x = 0; x < 2; x++) {
-            board[i][x] = ".";
+void initializeBoard(char board[][3]){
+    for (int x = 0; x < 3; x++) {
+        for (int y = 0; y < 3; y++) {
+            board[x][y] = '.';
         }
     }
-    return boardPointer[0];
+
 };
 
 void printBoard(char board[][3]){
