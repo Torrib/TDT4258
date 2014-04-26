@@ -5,7 +5,7 @@
 //  Copyright (c) 2014 Pia Lindkjølen. All rights reserved.
 //
 
-#include <tictactoe.h>
+#include "tictactoe.h"
 #include <stdio.h>
 
 // Prototypes
@@ -145,4 +145,9 @@ void printBoard(char board[][3]){
         }
         printf("\n");
     }
+}
+
+void tictactoe_event(int event)
+{
+
 }
