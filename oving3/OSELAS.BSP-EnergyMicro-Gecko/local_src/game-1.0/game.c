@@ -11,7 +11,7 @@ int framebuffer;
 int gamepad;
 
 static void game_stuff(void);
-static void interrupt_handler(int, siginfo_t, void);
+static void interrupt_handler(int, siginfo_t*, void*);
 
 int main(int argc, char *argv[])
 {
