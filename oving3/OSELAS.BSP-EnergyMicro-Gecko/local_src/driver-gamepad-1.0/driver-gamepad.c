@@ -62,65 +62,65 @@ struct class *cl;
 
 static int __init my_driver_init(void)
 {
-	//Get device number
-	alloc_chrdev_region(&devicenumber, 0, 1, NAME);
+    //Get device number
+    alloc_chrdev_region(&devicenumber, 0, 1, NAME);
 
-	//Request and map memory
-	check_mem_region(GPIO_BASE, GPIO_SIZE);
-	request_mem_region(GPIO_BASE, GPIO_SIZE, NAME);
+    //Request and map memory
+    check_mem_region(GPIO_BASE, GPIO_SIZE);
+    request_mem_region(GPIO_BASE, GPIO_SIZE, NAME);
 
-	gpio = ioremap_nocache(GPIO_BASE, GPIO_SIZE);
+    gpio = ioremap_nocache(GPIO_BASE, GPIO_SIZE);
 
-	//Set up GPIO
-	write_register(GPIO_PA_CTRL, 0x2);
-	write_register(GPIO_PA_MODEH, 0x55555555);
-	write_register(GPIO_PA_DOUT, 0xFF00);
-	write_register(GPIO_PC_MODEL, 0x33333333);
-	write_register(GPIO_PC_DOUT, 0xFF);
-	write_register(GPIO_IEN, 0xFF);
-	write_register(GPIO_EXTIPSELL, 0x22222222);
-	write_register(GPIO_EXTIRISE, 0xFF);
-	write_register(GPIO_EXTIFALL, 0xFF);
-	write_register(GPIO_IFC, 0xFFFF);
+    //Set up GPIO
+    write_register(GPIO_PA_CTRL, 0x2);
+    write_register(GPIO_PA_MODEH, 0x55555555);
+    write_register(GPIO_PA_DOUT, 0xFF00);
+    write_register(GPIO_PC_MODEL, 0x33333333);
+    write_register(GPIO_PC_DOUT, 0xFF);
+    write_register(GPIO_IEN, 0xFF);
+    write_register(GPIO_EXTIPSELL, 0x22222222);
+    write_register(GPIO_EXTIRISE, 0xFF);
+    write_register(GPIO_EXTIFALL, 0xFF);
+    write_register(GPIO_IFC, 0xFFFF);
 
-	request_irq(17, irq_handler, 0, NAME, NULL);
-	request_irq(18, irq_handler, 0, NAME, NULL);
+    request_irq(17, irq_handler, 0, NAME, NULL);
+    request_irq(18, irq_handler, 0, NAME, NULL);
 
-	/* Make the userpace driver file. */
+    /* Make the userpace driver file. */
     //Create file based on driver name
     cl = class_create(THIS_MODULE, NAME);
     device_create(cl, NULL, devicenumber, NULL, NAME);
 
-	//Register driver
-	cdev_init(&gamepad_cdev, &driver_fops);
-	gamepad_cdev.owner = THIS_MODULE;
-	cdev_add(&gamepad_cdev, devicenumber, 1);
+    //Register driver
+    cdev_init(&gamepad_cdev, &driver_fops);
+    gamepad_cdev.owner = THIS_MODULE;
+    cdev_add(&gamepad_cdev, devicenumber, 1);
 
-	printk(KERN_INFO "%s loaded... Major number is %d\n", NAME, MAJOR(devicenumber));
+    printk(KERN_INFO "%s loaded... Major number is %d\n", NAME, MAJOR(devicenumber));
 
 
-	return 0;
+    return 0;
 }
 
 static void __exit my_driver_exit(void)
 {
-	cdev_del(&gamepad_cdev);
-	iounmap(gpio);
-	release_mem_region(GPIO_BASE, GPIO_SIZE);
-	unregister_chrdev_region(devicenumber, 1);
-	free_irq(17, NULL);
-	free_irq(18, NULL);
-	printk(KERN_INFO "%s unloaded...", NAME);
+    cdev_del(&gamepad_cdev);
+    iounmap(gpio);
+    release_mem_region(GPIO_BASE, GPIO_SIZE);
+    unregister_chrdev_region(devicenumber, 1);
+    free_irq(17, NULL);
+    free_irq(18, NULL);
+    printk(KERN_INFO "%s unloaded...", NAME);
 }
 
 void write_register(uint32_t offset, uint32_t value)
 {
-	*(volatile uint32_t *) ((uint32_t) gpio + offset) = value;
+    *(volatile uint32_t *) ((uint32_t) gpio + offset) = value;
 }
 
 uint32_t read_register(uint32_t offset)
 {
-	return *(volatile uint32_t *) ((uint32_t) gpio + offset); 
+    return *(volatile uint32_t *) ((uint32_t) gpio + offset); 
 }
 
 static int driver_open (struct inode *inode, struct file *filp)
@@ -137,55 +137,55 @@ static int driver_release (struct inode *inode, struct file *filp)
 
 static ssize_t driver_read (struct file *filp, char __user *buff, size_t count, loff_t *offp)
 {
-	return count;
+    return count;
 }
 
 static ssize_t driver_write (struct file *filp, const char __user *buff, size_t count, loff_t *offp)
 {
-	char pid_string[5];
-	int pid = 0;
+    char pid_string[5];
+    int pid = 0;
 
-	if(count > 5)
-		return -1;
+    if(count > 5)
+        return -1;
 
-	/* read the value from user space */
+    /* read the value from user space */
 
-	//Copy input from userspace to local buffer
-	copy_from_user(pid_string, buff, count);
-	sscanf(pid_string, "%d", &pid);
+    //Copy input from userspace to local buffer
+    copy_from_user(pid_string, buff, count);
+    sscanf(pid_string, "%d", &pid);
 
-	rcu_read_lock();
-	task = pid_task(find_pid_ns(pid, &init_pid_ns), PIDTYPE_PID);
-	if(task == NULL){
-		printk("Error: Could not find the task with pid: %d\n", pid);
-		rcu_read_unlock();
-		return -1;
-	}
-	rcu_read_unlock();
-	return count;
+    rcu_read_lock();
+    task = pid_task(find_pid_ns(pid, &init_pid_ns), PIDTYPE_PID);
+    if(task == NULL){
+        printk("Error: Could not find the task with pid: %d\n", pid);
+        rcu_read_unlock();
+        return -1;
+    }
+    rcu_read_unlock();
+    return count;
 }
 
 static irqreturn_t irq_handler(int irq, void *dev_id, struct pt_regs * regs)
 {
-	uint32_t buttons = read_register(GPIO_PC_DIN);
-	struct siginfo info;
-	int ret = 0;
-	output = (uint8_t) ~buttons;
-	/* send the signal */
-	memset(&info, 0, sizeof(struct siginfo));
-	info.si_signo = 5;
-	info.si_code = SI_QUEUE;	
-	info.si_int = output;
-	ret = send_sig_info(5, &info, t);
-	if (ret < 0) {
-		printk("error sending signal\n");
-		return ret;
-	}
+    uint32_t buttons = read_register(GPIO_PC_DIN);
+    struct siginfo info;
+    int ret = 0;
+    output = (uint8_t) ~buttons;
+    /* send the signal */
+    memset(&info, 0, sizeof(struct siginfo));
+    info.si_signo = 5;
+    info.si_code = SI_QUEUE;    
+    info.si_int = output;
+    ret = send_sig_info(5, &info, t);
+    if (ret < 0) {
+        printk("error sending signal\n");
+        return ret;
+    }
 
-	printk(output);
+    printk(output);
 
-	write_register(GPIO_IFC, 0xFFFF);
-	return IRQ_HANDLED;
+    write_register(GPIO_IFC, 0xFFFF);
+    return IRQ_HANDLED;
 }
 
 module_init(my_driver_init);
