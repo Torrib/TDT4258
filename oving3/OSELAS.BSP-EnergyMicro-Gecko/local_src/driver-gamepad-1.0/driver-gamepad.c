@@ -160,6 +160,7 @@ static irqreturn_t irq_handler(int irq, void *dev_id, struct pt_regs * regs)
 {
 	uint32_t buttons = read_register(GPIO_PC_DIN);
 	struct siginfo info;
+	int ret;
 	output = (uint8_t) ~buttons;
 	/* send the signal */
 	memset(&info, 0, sizeof(struct siginfo));
