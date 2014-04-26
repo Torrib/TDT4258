@@ -13,6 +13,8 @@
 #include <linux/rcupdate.h>
 #include <linux/sched.h>
 
+#include <linux/device.h>
+
 #include <asm/io.h>
 #include <asm/uaccess.h>
 #include <asm/siginfo.h>
@@ -20,15 +22,15 @@
 
 #include "efm32gg.h"
 
-#define NAME "gamepad1337"
+#define NAME "gamepad"
 
 typedef unsigned int uint32_t;
 typedef unsigned short uint16_t;
 typedef unsigned char uint8_t;
 
 //Prototypes
-static int __init driver_init(void);
-static void __exit driver_exit(void);
+static int __init my_driver_init(void);
+static void __exit my_driver_exit(void);
 static int driver_open(struct inode *inode, struct file *filep);
 static int driver_release(struct inode *inode, struct file *filep);
 static ssize_t driver_read(struct file *filep, char __user *buff, size_t count, loff_t *offp);
@@ -58,10 +60,8 @@ struct task_struct *task;
 /** Class for userspace /dev/NAME file */
 struct class *cl;
 
-static int __init driver_init(void)
+static int __init my_driver_init(void)
 {
-
-
 	//Get device number
 	alloc_chrdev_region(&devicenumber, 0, 1, NAME);
 
@@ -86,6 +86,11 @@ static int __init driver_init(void)
 	request_irq(17, irq_handler, 0, NAME, NULL);
 	request_irq(18, irq_handler, 0, NAME, NULL);
 
+	/* Make the userpace driver file. */
+    //Create file based on driver name
+    cl = class_create(THIS_MODULE, NAME);
+    device_create(cl, NULL, devicenumber, NULL, NAME);
+
 	//Register driver
 	cdev_init(&gamepad_cdev, &driver_fops);
 	gamepad_cdev.owner = THIS_MODULE;
@@ -93,15 +98,11 @@ static int __init driver_init(void)
 
 	printk(KERN_INFO "%s loaded... Major number is %d\n", NAME, MAJOR(devicenumber));
 
-	/* Make the userpace driver file. */
-    //Create file based on driver name
-    cl = class_create(THIS_MODULE, NAME);
-    device_create(cl, NULL, devicenumber, NULL, MAJOR);
 
 	return 0;
 }
 
-static void __exit driver_exit(void)
+static void __exit my_driver_exit(void)
 {
 	cdev_del(&gamepad_cdev);
 	iounmap(gpio);
@@ -171,7 +172,7 @@ static irqreturn_t irq_handler(int irq, void *dev_id, struct pt_regs * regs)
 	int ret = 0;
 	output = (uint8_t) ~buttons;
 	/* send the signal */
-	memset(&info, 0, sizeof(struct siginfo));
+	/*memset(&info, 0, sizeof(struct siginfo));
 	info.si_signo = 42;
 	info.si_code = SI_QUEUE;	
 	info.si_int = output;
@@ -179,7 +180,7 @@ static irqreturn_t irq_handler(int irq, void *dev_id, struct pt_regs * regs)
 	if (ret < 0) {
 		printk("error sending signal\n");
 		return ret;
-	}
+	}*/
 
 	printk(output);
 
@@ -187,8 +188,8 @@ static irqreturn_t irq_handler(int irq, void *dev_id, struct pt_regs * regs)
 	return IRQ_HANDLED;
 }
 
-module_init(driver_init);
-module_exit(driver_exit);
+module_init(my_driver_init);
+module_exit(my_driver_exit);
 
 MODULE_DESCRIPTION("Gamepad driver");
-MODULE_LICENSE("Apache 2.0");
+MODULE_LICENSE("GPL");
