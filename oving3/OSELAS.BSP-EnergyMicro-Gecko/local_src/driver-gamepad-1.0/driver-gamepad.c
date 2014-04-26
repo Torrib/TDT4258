@@ -98,18 +98,24 @@ static int __init my_driver_init(void)
 
     printk(KERN_INFO "%s loaded... Major number is %d\n", NAME, MAJOR(devicenumber));
 
-
     return 0;
 }
 
 static void __exit my_driver_exit(void)
 {
+    //Cleanup drivers
+    device_destroy(cl, devicenumber);
+    class_destroy(cl);
+
     cdev_del(&gamepad_cdev);
+
+    //Cleanup IO
     iounmap(gpio);
     release_mem_region(GPIO_BASE, GPIO_SIZE);
     unregister_chrdev_region(devicenumber, 1);
     free_irq(17, NULL);
     free_irq(18, NULL);
+
     printk(KERN_INFO "%s unloaded...", NAME);
 }
 
@@ -123,24 +129,24 @@ uint32_t read_register(uint32_t offset)
     return *(volatile uint32_t *) ((uint32_t) gpio + offset);
 }
 
-static int driver_open (struct inode *inode, struct file *filp)
+static int driver_open(struct inode *inode, struct file *filp)
 {
     printk(KERN_INFO "%s opened\n", NAME);
     return 0;
 }
 
-static int driver_release (struct inode *inode, struct file *filp)
+static int driver_release(struct inode *inode, struct file *filp)
 {
     printk(KERN_INFO "%s closed\n", NAME);
     return 0;
 }
 
-static ssize_t driver_read (struct file *filp, char __user *buff, size_t count, loff_t *offp)
+static ssize_t driver_read(struct file *filp, char __user *buff, size_t count, loff_t *offp)
 {
     return count;
 }
 
-static ssize_t driver_write (struct file *filp, const char __user *buff, size_t count, loff_t *offp)
+static ssize_t driver_write(struct file *filp, const char __user *buff, size_t count, loff_t *offp)
 {
     char pid_string[5];
     int pid = 0;
