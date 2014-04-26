@@ -8,8 +8,8 @@
 
 #include <stdio.h>
 
-//char* initializeBoard();
-//void printBoard();
+char* initializeBoard();
+void printBoard(char[][3]);
 int hasWon();
 
 //Here comes the ulgiest thing in the world:
@@ -23,23 +23,18 @@ int main(int argc, const char * argv[])
     int play = 1;
     int column, row, x, y;
     char board[3][3];
-    char* boardPointer[3];
+    //char* boardPointer[3];
     
-    //Should be in a method
+    //Initialize board, should be in a method
     for (x = 0; x < 3; x++) {
-        
         for (y = 0; y < 3; y++) {
             board[x][y] = '.';
         }
-
     }
-    //Should be a method printBoard()
-    for (int i = 0; i < 3; i++) {
-        for (int x = 0; x < 3; x++) {
-            printf("%c", board[i][x]);
-        }
-        printf("\n");
-    }
+    
+    *board = initializeBoard();
+    
+    printBoard(board);
     
     while (play == 1) {
         while (hasTurn == 1) {
@@ -166,24 +161,24 @@ int main(int argc, const char * argv[])
 /*int hasWon(int hasTurn){
     
 };*/
-/*
+
+ 
 char* initializeBoard(){
     char board[3][3];
-    char (*boardPointer)[3];
-    boardPointer = board;
+    
     for (int i = 0; i < 2; i++) {
         for (int x = 0; x < 2; x++) {
-            board[i][x] = "i";
+            board[i][x] = ".";
         }
     }
     return boardPointer[0];
 };
 
-void printBoard(){
+void printBoard(char board[][3]){
     for (int i = 0; i < 3; i++) {
         for (int x = 0; x < 3; x++) {
-        //    printf( "[%d][%d]=%d", i, x, board[i][x] );
+            printf("%c", board[i][x]);
         }
-    }
-};*/
+        printf("\n");
+    }};
 
