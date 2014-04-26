@@ -173,7 +173,7 @@ static irqreturn_t irq_handler(int irq, void *dev_id, struct pt_regs * regs)
 	// 	return ret;
 	// }
 
-	printf(output);
+	printk(output);
 
 	write_register(GPIO_IFC, 0xFFFF);
 	return IRQ_HANDLED;
