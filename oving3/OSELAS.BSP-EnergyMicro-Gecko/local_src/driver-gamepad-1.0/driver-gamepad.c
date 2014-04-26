@@ -132,7 +132,7 @@ static ssize_t driver_write (struct file *filp, const char __user *buff, size_t 
 	/* read the value from user space */
 	if(count > 10)
 		return -EINVAL;
-	copy_from_user(pid_string, buf, count);
+	copy_from_user(pid_string, buff, count);
 	sscanf(pid_string, "%d", &pid);
 
 	rcu_read_lock();
