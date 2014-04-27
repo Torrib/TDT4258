@@ -16,7 +16,6 @@
 int framebuffer;
 int gamepad;
 
-static void game_stuff(void);
 static void interrupt_handler(int, siginfo_t*, void*);
 
 int main(int argc, char *argv[])
@@ -74,18 +73,4 @@ void interrupt_handler(int n, siginfo_t *info, void *unused) {
 
     //Propagate the event here. [0 4] Up, down, left, right, click
     tictactoe_event(buttons);
-}
-
-void game_stuff(void)
-{
-	//memset(framebuffer, 0x0000, FB_SIZE);
-
-	// struct fb_copyarea rect;
-
-	// rect.x = 100;
-	// rect.y = 100;
-	// rect.width = 30;
-	// rect.height = 30;
-
-	// ioctl(framebuffer, 0x4680, &rect);
 }
