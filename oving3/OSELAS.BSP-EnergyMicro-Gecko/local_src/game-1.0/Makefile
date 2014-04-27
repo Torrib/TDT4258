@@ -14,7 +14,7 @@ LDFLAGS +=
 all: game
 
 game: game.c cross.h
-	${CC} ${CFLAGS} game.c cross.h
+	${CC} ${CFLAGS} game.c cross.h -o game
 
 clean:
 	-rm -f game
