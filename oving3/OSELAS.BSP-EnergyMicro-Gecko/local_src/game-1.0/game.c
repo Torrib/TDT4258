@@ -93,7 +93,7 @@ void draw(int x, int y, uint16_t color)
 }
 
 void interrupt_handler(int n, siginfo_t *info, void *unused) {
-    uint8_t buttons = (uint8_t) ~(info->si_int);
+    uint8_t buttons = (uint8_t) (info->si_int);
 
     //Propagate the event here. [0 4] Up, down, left, right, click
     tictactoe_event(buttons);
@@ -242,5 +242,5 @@ void printBoard(char board[][3]){
 
 void tictactoe_event(uint8_t event)
 {
-    printf("%i", event);
+    printf("%i\n", event);
 }
