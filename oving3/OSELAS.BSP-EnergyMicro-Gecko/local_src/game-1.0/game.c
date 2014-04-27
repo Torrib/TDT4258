@@ -9,6 +9,7 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include <unistd.h>
+#include <linux/ioport.h>
 
 #include <sys/mman.h>
 #include <sys/stat.h>
@@ -123,8 +124,8 @@ int main(int argc, char *argv[])
     //Starts the game
     init_tictactoe();
 
-    memwrite(EMU_CTRL, 0, 0);
-    memwrite(SCR, 0, 4);
+    memwrite(EMU_CTRL, 0, 0, 1);
+    memwrite(SCR, 0, 4, 3);
 
     __asm("wfi");
 
@@ -345,7 +346,12 @@ int hasWon()
     return 0;
 }
 
-void memwrite(void *base, uint32_t offset, uint32_t value)
+void memwrite(void *base, uint32_t offset, uint32_t value, uint32_t size)
 {
-    *(volatile uint32_t *) ((uint32_t) base + offset) = value;
+    check_mem_region(base, size);
+    request_mem_region(base, size, "game");
+
+    //makes memory accessable and gets the base value for GPIO operations
+    new_base = ioremap_nocache(base, size);
+    *(volatile uint32_t *) ((uint32_t) new_base + offset) = value;
 }
