@@ -45,6 +45,8 @@ struct fb_fix_screeninfo finfo;
 
 struct fb_copyarea rect;
 
+uint16_t framebuffer_size;
+
 int main(int argc, char *argv[])
 {
     printf("Starting game\n");
@@ -88,14 +90,18 @@ int main(int argc, char *argv[])
 	rect.width = 320;
 	rect.height = 240;
 
-    //Initiate the screen
-   	screen = (uint16_t *) mmap(NULL, 320*240*2, PROT_READ | PROT_WRITE, MAP_SHARED, framebuffer, 0);
+	framebuffer_size = vinfo.xres * vinfo.yres * vinfo.bits_per_pixel / 8;
 
-    if(*screen == 0)
+    //Initiate the screen
+   	*screen = (uint16_t *) mmap(NULL, framebuffer_size, PROT_READ | PROT_WRITE, MAP_SHARED, framebuffer, 0);
+	
+    if(screen == -1)
 	{
-		printf("Error: Mapping memory failed\n");
+		printf("Error: Mapping memory failed with code %d \n", screen);
         return 1;
 	}
+	
+	printf("Framebuffer size: %d\nFramebuffer address: %d\n", framebuffer_size, screen);
 
 	// Setup signal handling
     struct sigaction sign;
@@ -116,7 +122,10 @@ void draw(int x, int y, uint16_t color)
 {
     // Find memory location for x and y pos
     long int location = (x + vinfo.xoffset) * (vinfo.bits_per_pixel/8)
-        + (y + vinfo.xoffset) * finfo.line_length;
+        + (y + vinfo.yoffset) * finfo.line_length;
+
+	//printf("Performing draw.\nvinfo.xoffset=%d\nvinfo.yoffset=%d\nvinfo.bits_per_pixel=%d\nfinfo.line_length=%d\n",
+	//	vinfo.xoffset, vinfo.yoffset, vinfo.bits_per_pixel, finfo.line_length);
 
 	//Draw at the location
     *(screen + location) = 0xffff;
@@ -128,14 +137,14 @@ void draw(int x, int y, uint16_t color)
 void drawGame()
 {
 	//Empty the memory
-	memset(screen, 0x0000, 320*240*2);
+	memset(screen, 0x0000, framebuffer_size);
 
 	/* Draw the board using the draw method*/
     for(int i = 0; i < 100; i++)
         for(int y = 0; y <250; y++)
 		{
 			draw(i, y, 100);
-			//framebuffer[i * 320 + y] = 0xffff;
+			//screen[i * 320 + y] = 0xffff;
 		}
 
 	//Command driver to update display
