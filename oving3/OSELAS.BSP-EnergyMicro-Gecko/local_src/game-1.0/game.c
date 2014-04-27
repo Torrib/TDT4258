@@ -142,8 +142,8 @@ void drawGame()
     for(int i = 0; i < 100; i++)
         for(int y = 0; y <250; y++)
 		{
-			draw(i, y, 100);
-			//screen[i * 320 + y] = 0xffff;
+			//draw(i, y, 100);
+			screen[i * 320 + y] = 0xffff;
 		}
 
 	//Command driver to update display
