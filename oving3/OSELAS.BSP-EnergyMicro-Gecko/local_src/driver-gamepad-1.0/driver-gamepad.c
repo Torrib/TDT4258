@@ -30,7 +30,7 @@ typedef unsigned int uint32_t;
 
 static int __init my_driver_init(void);
 static void __exit my_driver_exit(void);
-static void write_register(uint32_t offset, uint32_t value);
+static void write_register(__iomem gpio, uint32_t offset, uint32_t value);
 static uint32_t read_register(uint32_t offset);
 static int driver_open(struct inode *inode, struct file *filep);
 static int driver_release(struct inode *inode, struct file *filep);
@@ -55,7 +55,7 @@ void __iomem *gpio;
 char output;
 struct task_struct *task;
 struct siginfo signal_info;
-uint8_t driver_open = 0;
+uint8_t driver_enabled = 0;
 
 /** Class for userspace /dev/NAME file */
 struct class *cl;
@@ -150,17 +150,17 @@ uint32_t read_register(__iomem base, uint32_t offset)
 
 static int driver_open(struct inode *inode, struct file *filp)
 {
-    if(driver_open == 0) {
-        driver_open++;
+    if(driver_enabled == 0) {
+        driver_enabled++;
         return 0;
     }
-    printk(KERN_INFO "%s driver_open\n", NAME);
+    printk(KERN_INFO "%s driver_enabled\n", NAME);
     return 0;
 }
 
 static int driver_release(struct inode *inode, struct file *filp)
 {
-    driver_open--;
+    driver_enabled--;
     printk(KERN_INFO "%s closed\n", NAME);
     return 0;
 }
@@ -202,7 +202,7 @@ static irqreturn_t irq_handler(int irq, void *dev_id, struct pt_regs * regs)
 	int ret = 0;
 	write_register(GPIO_IFC, 0xFFFF);
 	/* send the signal */
-    if(driver_open)
+    if(driver_enabled)
         ret = send_sig_info(50, &signal_info, task);
     if (ret < 0) {
         printk("Cannot send signal...\n");
