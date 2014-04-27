@@ -45,7 +45,7 @@ struct fb_fix_screeninfo finfo;
 
 struct fb_copyarea rect;
 
-uint16_t framebuffer_size;
+long int framebuffer_size;
 
 int main(int argc, char *argv[])
 {
@@ -93,15 +93,17 @@ int main(int argc, char *argv[])
 	framebuffer_size = vinfo.xres * vinfo.yres * vinfo.bits_per_pixel / 8;
 
     //Initiate the screen
-   	*screen = (uint16_t *) mmap(NULL, framebuffer_size, PROT_READ | PROT_WRITE, MAP_SHARED, framebuffer, 0);
-	
+    screen = (uint16_t *) mmap(NULL, framebuffer_size, PROT_READ | PROT_WRITE, MAP_SHARED, framebuffer, 0);
+
     if(screen == -1)
 	{
 		printf("Error: Mapping memory failed with code %d \n", screen);
         return 1;
 	}
-	
+
 	printf("Framebuffer size: %d\nFramebuffer address: %d\n", framebuffer_size, screen);
+	printf("vinfo.xoffset=%d\nvinfo.yoffset=%d\nvinfo.bits_per_pixel=%d\nfinfo.line_length=%d\n",
+		vinfo.xoffset, vinfo.yoffset, vinfo.bits_per_pixel, finfo.line_length);
 
 	// Setup signal handling
     struct sigaction sign;
@@ -122,10 +124,7 @@ void draw(int x, int y, uint16_t color)
 {
     // Find memory location for x and y pos
     long int location = (x + vinfo.xoffset) * (vinfo.bits_per_pixel/8)
-        + (y + vinfo.yoffset) * finfo.line_length;
-
-	//printf("Performing draw.\nvinfo.xoffset=%d\nvinfo.yoffset=%d\nvinfo.bits_per_pixel=%d\nfinfo.line_length=%d\n",
-	//	vinfo.xoffset, vinfo.yoffset, vinfo.bits_per_pixel, finfo.line_length);
+        + (y + vinfo.yoffset);// * finfo.line_length;
 
 	//Draw at the location
     *(screen + location) = 0xffff;
@@ -143,8 +142,8 @@ void drawGame()
     for(int i = 0; i < 100; i++)
         for(int y = 0; y <250; y++)
 		{
-			draw(i, y, 100);
-			//screen[i * 320 + y] = 0xffff;
+			//draw(i, y, 100);
+			screen[i * 320 + y] = 0xffff;
 		}
 
 	//Command driver to update display
@@ -202,7 +201,7 @@ int init_tictactoe()
                 hasTurn = 2;
         }
 
-		drawGame();		
+		drawGame();
 
         //Do the same for player two - is there a way to do this without the loops?
 
@@ -331,5 +330,5 @@ void tictactoe_event(uint8_t event)
         //Action
         printf("Action\n");
     }
-    
+
 }
