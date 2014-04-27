@@ -1,21 +1,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <linux/fb.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <sys/ioctl.h>
 #include <stdint.h>
-#include <unistd.h>
 #include <string.h>
 #include <signal.h>
-#include <linux/fb.h>
 #include <inttypes.h>
 #include <stdbool.h>
 
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/ioctl.h>
+
 #include "cross.h"
 #include "circle.h"
+#include "efm32gg.h"
 
 #define BACKGROUND 0x0000
 #define FOREGROUND 0x7777
@@ -36,7 +36,6 @@ int check_move(int x, int y);
 void move(int x, int y);
 void drawLocation();
 void select_frame();
-
 static void interrupt_handler(int, siginfo_t*, void*);
 
 int posX = 0;
@@ -119,6 +118,13 @@ int main(int argc, char *argv[])
     rect.width = 320;
     rect.height = 240;
     ioctl(framebuffer, 0x4680, &rect);
+
+    //Power saving
+
+    *EMU_CTRL = 0;
+    *SCR = 4;
+
+    __asm("wfi");
 
     //Starts the game
     init_tictactoe();
