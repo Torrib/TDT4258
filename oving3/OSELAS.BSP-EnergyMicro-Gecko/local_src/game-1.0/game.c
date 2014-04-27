@@ -24,23 +24,23 @@ uint16_t *screen;
 //TICTACTOE
 
 // Prototypes for tictac toe
-void initializeBoard(char[][3]);
-void printBoard(char[][3]);
-int hasWon(char[][3], int hasTurn);
-int moveAllowed(char[][3], int *column,int *row);
-
-//Protos for logic
-static void interrupt_handler(int, siginfo_t*, void*);
-
-//Protos for tic
+void initialize_board();
+int hasWon();
+int check_move(int x, int y);
+void move(int x, int y);
+int frame_avalable();
 int init_tictactoe();
+void drawGame(char board[][3]);
+void select_frame();
+
+static void interrupt_handler(int, siginfo_t*, void*);
 void tictactoe_event(uint8_t event);
 
-//protos for drawing
-/** Low level draw method */
-void draw(int x, int y, uint16_t color);
-/** Hook for drawing the current game state */
-void drawGame(char board[][3]);
+int posx = 1;
+int posy = 1;
+int active_player = 1;
+
+int board[3][3]; 
 
 //Consts for drawing
 struct fb_var_screeninfo vinfo;
@@ -104,10 +104,6 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    printf("Framebuffer size: %ld\nFramebuffer address: %"PRIu16"\n", framebuffer_size, screen);
-    printf("vinfo.xoffset=%d\nvinfo.yoffset=%d\nvinfo.bits_per_pixel=%d\nfinfo.line_length=%d\n",
-        vinfo.xoffset, vinfo.yoffset, vinfo.bits_per_pixel, finfo.line_length);
-
     // Setup signal handling
     struct sigaction sign;
     sign.sa_sigaction = interrupt_handler;
@@ -123,19 +119,6 @@ int main(int argc, char *argv[])
     while(1){}
 
     return 0;
-}
-
-void draw(int x, int y, uint16_t color)
-{
-    // Find memory location for x and y pos
-    long int location = (x + vinfo.xoffset) * (vinfo.bits_per_pixel/8)
-        + (y + vinfo.yoffset);// * finfo.line_length;
-
-    //Draw at the location
-    *(screen + location) = 0xffff;
-    //*(screen + location + 1) = 20;
-    //*(screen + location + 2) = 200;
-    //*(screen + location) = 0;
 }
 
 void drawGame(char board[][3])
@@ -192,169 +175,135 @@ int init_tictactoe()
 {
     printf("Game initializing");
 
-    //hasTurn is 1 when it is player 1, and 2 when it is player two
-    int hasTurn = 1;
     int play = 1;
-    int column, row;
-    char board[3][3];
+    initialize_board();
 
-    initializeBoard(board);
+    //drawGame(board);
 
-    drawGame(board);
+    while (play == 1) 
+    {
+        //TODO indikate active square
 
-    while (play == 1) {
-        while (hasTurn == 1) {
-            printBoard(board);
-            printf("Player 1 - Choose column 0 - 2 :\n");
-            scanf("%d", &column);
-            printf("Player 1 - Choose row 0 - 2 :\n");
-            scanf("%d", &row);
-
-            //Check if the column and row is allowed
-            //Should be in a method
-
-            if(moveAllowed(board, &column, &row) == 1)
-                board[column][row] = 'X';
-            else
-                printf("Column or row not valid - try again.\n");
-
-            //Check if player 1 won
-            if (hasWon(board,hasTurn) == 1){
-                printf("%s", "Player 1 won!");
-                play = 0;
-            }
-            else
-                hasTurn = 2;
-        }
-
-        drawGame(board);
-
-        //Do the same for player two - is there a way to do this without the loops?
-
-        while (hasTurn == 2) {
-            printBoard(board);
-            printf("Player 2 - Choose column 0 - 2 :\n");
-            scanf("%d", &column);
-            printf("Player 2 - Choose row 0 - 2 :\n");
-            scanf("%d", &row);
-
-            //Check if the column and row is allowed
-            if(moveAllowed(board, &column, &row) == 1)
-                board[column][row] = '0';
-            else
-                printf("Column or row not valid - try again.\n");
-
-            //Check if player 2 has won
-            if (hasWon(board,hasTurn) == 1){
-                printf("%s", "Player 1 won!");
-                play = 0;
-            }
-            else
-                hasTurn = 1;
-
-        }
-
-        drawGame(board);
     }
 
     return 0;
 }
 
-int moveAllowed(char board[][3], int *column,int *row){
-    if((*column > 2
-        || *column < 0
-        || *row > 2
-        || *row < 0)) {
-
+int check_move(int x, int y)
+{
+    if(x > 2 || x < 0 || y > 2 || y < 0)
         return 0;
-    }
-
-    if(board[*column][*row] == 'X'
-       || board[*column][*row] == '0'){
-        return 0;
-    }
 
     return 1;
 }
 
-int hasWon(char board[][3], int hasTurn){
+void move(int x, int y)
+{
+    posx = x;
+    posy = y;
+    printf("%d-%d\n", x, y);
+    //TODO change active box;
+}
+
+int frame_available()
+{
+    if(board[posx][posy] == 0)
+        return 1;
+    
+    return 0;
+}
+
+void select_frame()
+{
+    board[posx][posy] = active_player;
+
+    if(hasWon() == 1)
+    {
+        printf("Player %d won!\n", active_player);
+        play = 0;
+        return;
+    }
+
+    if(active_player == 1)
+        active_player = 2;
+    else
+        active_player = 1;
+}
+
+int hasWon()
+{
     //Check rows
-    for (int x = 0; x < 3; x++) {
-        if ((board[x][0] == 'X') && (board[x][0] == board[x][1]) && (board[x][1] == board[x][2])) {
-            printf("%s", "Player 1 won the row \n");
+    for (int x = 0; x < 3; x++) 
+    {
+        if ((board[x][0] == active_player) && (board[x][0] == board[x][1]) && (board[x][1] == board[x][2]))             
             return 1;
-        }
+        
     }
     //Check columns
-    for (int y = 0; y < 3; y++) {
-        if ((board[0][y] == 'X') && (board[0][y] == board[1][y]) && (board[1][y] == board[2][y])) {
-            printf("%s", "Player 1 won the column! \n");
+    for (int y = 0; y < 3; y++) 
+    {
+        if ((board[0][y] == active_player) && (board[0][y] == board[1][y]) && (board[1][y] == board[2][y])) 
             return 1;
-        }
+        
     }
 
-    if((board[0][0] == 'X') && (board[0][0] == board[1][1]) && (board[1][1] == board[2][2])){
-        printf("%s", "Player 1 won the diagonal! \n");
+    if((board[0][0] == active_player) && (board[0][0] == board[1][1]) && (board[1][1] == board[2][2]))
         return 1;
-    }
+    
 
-    if((board[0][2] == 'X') && (board[0][2] == board[1][1]) && (board[1][1] == board[2][0])){
-        printf("%s", "Player 1 won! \n");
+    if((board[0][2] == active_player) && (board[0][2] == board[1][1]) && (board[1][1] == board[2][0]))
         return 1;
-    }
-    else
-        return 0;
+    
+    
+    return 0;
 }
 
-void initializeBoard(char board[][3]){
-    for (int x = 0; x < 3; x++) {
-        for (int y = 0; y < 3; y++) {
-            board[x][y] = '.';
+void initialize_board(){
+    for (int x = 0; x < 3; x++) 
+    {
+        for (int y = 0; y < 3; y++) 
+        {
+            board[x][y] = 0;
         }
-    }
-
-    //Write bits to the screen
-
-
-    //Update the screen
-}
-
-void printBoard(char board[][3]){
-    //Use this to add things in the buffer?
-    for (int i = 0; i < 3; i++) {
-        for (int x = 0; x < 3; x++) {
-            printf("%c", board[i][x]);
-        }
-        printf("\n");
     }
 }
 
 void tictactoe_event(uint8_t event)
 {
+    int newx = posx;
+    int newy = posy;
+
     if(event == 1)
     {
-        //Left
+        newx--;
         printf("Left\n");
     }
     else if(event == 2)
     {
-        //Up
+        newy--;
         printf("Up\n");
     }
     else if(event == 4)
     {
-        //Right
+        newx--;
         printf("Right\n");
     }
     else if(event == 8)
     {
-        //Down
+        newy++;
         printf("Down\n");
     }
     else if(event == 128)
     {
-        //Action
+        if(frame_avalable() == 1)
+            select_frame();
         printf("Action\n");
+    }
+
+    if(newy != posy || newx != posx)
+    {
+        if(check_move(newx, newy) == 1)
+            move(newx, newy)
     }
 
 }
