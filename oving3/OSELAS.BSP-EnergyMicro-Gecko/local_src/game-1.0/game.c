@@ -30,7 +30,7 @@ static void interrupt_handler(int, siginfo_t*, void*);
 
 //Protos for tic
 int init_tictactoe();
-void tictactoe_event(int event);
+void tictactoe_event(uint8_t event);
 
 //protos for drawing
 void draw(int x, int y, uint16_t color);
@@ -242,7 +242,7 @@ void printBoard(char board[][3]){
     }
 }
 
-void tictactoe_event(int event)
+void tictactoe_event(uint8_t event)
 {
-    printf(event);
+    printf("%i", event);
 }
