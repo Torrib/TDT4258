@@ -74,11 +74,12 @@ int main(int argc, char *argv[])
 
     // The game begins!
     init_tictactoe();
-/*
+
     for(int i = 0; i < 10; i++)
         for(int y = 0; y < 50; y++)
-            framebuffer[i * 320 + y] = 0xFFFF;
-  */
+		draw(i, y, 100);
+            //framebuffer[i * 320 + y] = 0xFFFF;
+
     while(1){}
 
 }
@@ -89,7 +90,8 @@ void draw(int x, int y, uint16_t color)
     long int location = (x + 0) * 2
         + (y + 0) * 2;
 
-    *(screen + location) = 100;
+	//Draw at the location
+    *(screen + location) = color;
 }
 
 void interrupt_handler(int n, siginfo_t *info, void *unused) {
