@@ -12,7 +12,7 @@
 #include <signal.h>
 #include <linux/fb.h>
 #include <inttypes.h>
-
+#include <stdbool.h>
 
 #include "cross.h"
 #include "circle.h"
@@ -30,16 +30,17 @@ void initialize_board();
 int hasWon();
 int check_move(int x, int y);
 void move(int x, int y);
-int frame_avalable();
+int frame_available();
 int init_tictactoe();
-void drawGame(char board[][3]);
+void drawGame();
+void drawLocation();
 void select_frame();
 
 static void interrupt_handler(int, siginfo_t*, void*);
 void tictactoe_event(uint8_t event);
 
-int posx = 1;
-int posy = 1;
+int posX = 0;
+int posY = 0;
 int active_player = 1;
 int running = 1;
 
@@ -90,12 +91,6 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    //Setup the draw area
-    rect.dx = 0;
-    rect.dy = 0;
-    rect.width = 320;
-    rect.height = 240;
-
     framebuffer_size = vinfo.xres * vinfo.yres * vinfo.bits_per_pixel / 8;
 
     //Initiate the screen
@@ -124,7 +119,7 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-void drawGame(char board[][3])
+void drawGame()
 {
     //Empty the memory
     memset(screen, 0x0000, framebuffer_size);
@@ -140,44 +135,80 @@ void drawGame(char board[][3])
     for(int y = 0; y < 3; y++)
         for(int x = 0; x < 3; x++)
         {
-            if(board[y][x] ==  'X')
-            {
-				//Offset for line
-				int xOffset = 10*x + 100*x;
-				int yOffset = 10*y + 74*y;
+			drawLocation(y, x);
+         }
+	
+	//Setup the draw area
+    rect.dx = 0;
+    rect.dy = 0;
+    rect.width = 320;
+    rect.height = 240;
 
-				for(int yy = 0; yy < image_cross.height; yy++)
-					for(int xx = 0; xx < image_cross.width; xx++)
-					{
-						long int pos = (image_cross.width * yy + xx) * image_cross.bytes_per_pixel;
-						uint16_t color = image_cross.pixel_data[pos];
-
-						//printf("%d %d %d\n", xx, yy, color);
-						screen[((yOffset + yy) * 320) + xOffset + xx] = color;
-					}
-
-            }
-            else if (board[y][x] == 'O'){
-				//Offset for line
-				int xOffset = 10*x + 100*x;
-				int yOffset = 10*y + 74*y;
-
-				for(int yy = 0; yy < image_circle.height; yy++)
-					for(int xx = 0; xx < image_circle.width; xx++)
-					{
-						long int pos = (image_circle.width * yy + xx) * image_circle.bytes_per_pixel;
-						uint16_t color = image_circle.pixel_data[pos];
-
-						//printf("%d %d %d\n", xx, yy, color);
-						screen[((yOffset + yy) * 320) + xOffset + xx] = color;
-					}
-
-
-			}
-        }
 
     //Command driver to update display
     ioctl(framebuffer, 0x4680, &rect);
+}
+
+void drawLocation(int y, int x)
+{
+	bool marker = false;
+	//TODO Null the area
+
+		//Offset for line
+		int xOffset = 10*x + 100*x;
+		int yOffset = 10*y + 74*y;
+
+	//Draw the current game field
+	if(posX == x && posY == y)
+	{
+		marker = true;
+
+		for(int y = 0; y < image_circle.height; y++)
+			for(int x = 0; x < image_circle.width; x++)
+			{
+				screen[((yOffset + y) * 320) + xOffset + x] = 0x7777;
+			}
+	}
+	else
+    	memset(screen + yOffset * vinfo.xres + xOffset, 0x0000, 100 * 74 * vinfo.bits_per_pixel / 8);
+
+   if(board[y][x] ==  'X')
+    {
+		for(int yy = 0; yy < image_cross.height; yy++)
+			for(int xx = 0; xx < image_cross.width; xx++)
+			{
+				long int pos = (image_cross.width * yy + xx) * image_cross.bytes_per_pixel;
+				uint16_t color = image_cross.pixel_data[pos];
+
+				//printf("%d %d %d\n", xx, yy, color);
+				screen[((yOffset + yy) * 320) + xOffset + xx] = color;
+			}
+
+    }
+    else if (board[y][x] == 'O'){
+		//Offset for line
+		int xOffset = 10*x + 100*x;
+		int yOffset = 10*y + 74*y;
+
+		for(int yy = 0; yy < image_circle.height; yy++)
+			for(int xx = 0; xx < image_circle.width; xx++)
+			{
+				long int pos = (image_circle.width * yy + xx) * image_circle.bytes_per_pixel;
+				uint16_t color = image_circle.pixel_data[pos];
+
+				//printf("%d %d %d\n", xx, yy, color);
+				screen[((yOffset + yy) * 320) + xOffset + xx] = color;
+			}
+	}
+	else if(!marker)
+    	memset(screen + yOffset * vinfo.xres + xOffset, 0x0000, 100 * 74 * vinfo.bits_per_pixel / 8);
+
+	rect.dx = xOffset;
+    rect.dy = yOffset;
+    rect.width = 100;
+    rect.height = 74;
+    ioctl(framebuffer, 0x4680, &rect);
+
 }
 
 void interrupt_handler(int n, siginfo_t *info, void *unused) {
@@ -200,6 +231,8 @@ int init_tictactoe()
 
     //drawGame(board);
 
+
+
     while (running == 1) 
     {
         //TODO indikate active square
@@ -219,15 +252,20 @@ int check_move(int x, int y)
 
 void move(int x, int y)
 {
-    posx = x;
-    posy = y;
+	// Null out the last area
+	drawLocation(posY, posX);
+
+    posX = x;
+    posY = y;
     printf("%d-%d\n", x, y);
-    //TODO change active box;
+
+	//Draw the new area	
+	drawLocation(posY, posX);
 }
 
 int frame_available()
 {
-    if(board[posx][posy] == 0)
+    if(board[posX][posY] == 0)
         return 1;
     
     return 0;
@@ -235,7 +273,7 @@ int frame_available()
 
 void select_frame()
 {
-    board[posx][posy] = active_player;
+    board[posX][posY] = active_player;
 
     if(hasWon() == 1)
     {
@@ -287,13 +325,13 @@ void initialize_board(){
         }
     }
 	
-	drawGame(board);
+	drawGame();
 }
 
 void tictactoe_event(uint8_t event)
 {
-    int newx = posx;
-    int newy = posy;
+    int newx = posX;
+    int newy = posY;
 
     if(event == 1)
     {
@@ -307,7 +345,7 @@ void tictactoe_event(uint8_t event)
     }
     else if(event == 4)
     {
-        newx--;
+        newx++;
         printf("Right\n");
     }
     else if(event == 8)
@@ -317,15 +355,15 @@ void tictactoe_event(uint8_t event)
     }
     else if(event == 128)
     {
-        if(frame_avalable() == 1)
+        if(frame_available() == 1)
             select_frame();
         printf("Action\n");
     }
 
-    if(newy != posy || newx != posx)
+    if(newy != posY || newx != posX)
     {
         if(check_move(newx, newy) == 1)
-            move(newx, newy)
+    		move(newx, newy);
     }
 
 }
