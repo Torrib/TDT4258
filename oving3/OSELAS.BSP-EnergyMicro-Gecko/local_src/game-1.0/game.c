@@ -8,6 +8,7 @@
 #include <signal.h>
 #include <inttypes.h>
 #include <stdbool.h>
+#include <unistd.h>
 
 #include <sys/mman.h>
 #include <sys/stat.h>
@@ -119,13 +120,6 @@ int main(int argc, char *argv[])
     rect.height = 240;
     ioctl(framebuffer, 0x4680, &rect);
 
-    //Power saving
-
-    *EMU_CTRL = 0;
-    *SCR = 4;
-
-    __asm("wfi");
-
     //Starts the game
     init_tictactoe();
 
@@ -148,7 +142,11 @@ int init_tictactoe()
     }
 
     //Run while the game has not finished
-    while (running == 1) {}
+    while (running == 1) 
+    {
+        sleep(1);
+
+    }
 
     return 0;
 }
