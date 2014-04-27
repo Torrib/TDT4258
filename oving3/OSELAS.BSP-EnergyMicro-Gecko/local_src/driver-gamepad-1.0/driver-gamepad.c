@@ -197,10 +197,10 @@ static ssize_t driver_write(struct file *filp, const char __user *buff, size_t c
 
 static irqreturn_t irq_handler(int irq, void *dev_id, struct pt_regs * regs)
 {
-    uint32_t buttons = read_register(GPIO_PC_DIN);
+    uint32_t buttons = read_register(gpio, GPIO_PC_DIN);
     signal_info.si_int = ~buttons;
 	int ret = 0;
-	write_register(GPIO_IFC, 0xFFFF);
+	write_register(gpio, GPIO_IFC, 0xFFFF);
 	/* send the signal */
     if(driver_enabled)
         ret = send_sig_info(50, &signal_info, task);
