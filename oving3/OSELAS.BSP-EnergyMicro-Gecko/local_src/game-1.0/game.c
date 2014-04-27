@@ -262,15 +262,18 @@ int check_move(int x, int y)
 
 void move(int x, int y)
 {
-	// Null out the last area
-	drawLocation(posY, posX);
-
+	int tempY = posY;
+	int tempX = posX;
     posX = x;
     posY = y;
-    printf("%d-%d\n", x, y);
-
 	//Draw the new area	
 	drawLocation(posY, posX);
+
+	// Null out the last area
+	drawLocation(tempY, tempX);
+
+    printf("%d-%d\n", x, y);
+
 }
 
 int frame_available()
