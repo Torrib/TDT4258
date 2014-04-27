@@ -275,7 +275,7 @@ void select_frame()
 {
     board[posX][posY] = active_player;
 
-    drawLocation(posX, posY);
+    drawLocation(posY, posX);
     if(hasWon() == 1)
     {
         printf("Player %d won!\n", active_player);
@@ -363,7 +363,7 @@ void tictactoe_event(uint8_t event)
         if(check_move(newx, newy) == 1)
     		move(newx, newy);
         else
-            printf("Illegal move\n")
+            printf("Illegal move\n");
     }
 
 }
