@@ -30,7 +30,7 @@ uint16_t *screen;
 //TICTACTOE
 
 // Prototypes for tictac toe
-void initialize_board();
+void init_tictactoe();
 int hasWon();
 int check_move(int x, int y);
 void move(int x, int y);
@@ -39,7 +39,6 @@ void drawLocation();
 void select_frame();
 
 static void interrupt_handler(int, siginfo_t*, void*);
-void tictactoe_event(uint8_t event);
 
 int posX = 0;
 int posY = 0;
@@ -133,7 +132,7 @@ int init_tictactoe()
 {
     printf("Game Starting!\n");
 
-    //Initiates the board array
+    //Initiate the board 
     for (int x = 0; x < 3; x++) 
     {
         for (int y = 0; y < 3; y++) 
@@ -143,6 +142,7 @@ int init_tictactoe()
         }
     }
 
+    //Run while the game has not finished
     while (running == 1) {}
 
     return 0;
@@ -150,16 +150,16 @@ int init_tictactoe()
 
 void drawLocation(int y, int x)
 {
-	bool marker = false;
+	bool active = false;
 
 	//Offset for our working area
 	int xOffset = 10*x + 100*x;
 	int yOffset = 10*y + 73*y;
 
-	//Draw the current marker field
+	//Mark the currently active square
 	if(posX == x && posY == y)
 	{
-		marker = true;
+		active = true;
 
 		for(int y = 0; y < image_circle.height; y++)
 			for(int x = 0; x < image_circle.width; x++)
@@ -167,53 +167,55 @@ void drawLocation(int y, int x)
 				screen[((yOffset + y) * 320) + xOffset + x] = HIGHLIGHT;
 			}
 	}
-	else // Remove the marked location showing
+	else // Redraw the previous active square
 		for(int y = 0; y < image_circle.height; y++)
 			for(int x = 0; x < image_circle.width; x++)
 				screen[((yOffset + y) * 320) + xOffset + x] = FOREGROUND;
-    	//memset(screen + yOffset * vinfo.xres + xOffset, 0x0000, 100 * 73 * vinfo.bits_per_pixel / 8);
 
-	/* Draw game items of there is any */
-   if(board[x][y] ==  1)
+
+    //Draw symbols
+    if(board[x][y] ==  1)
     {
 		for(int yy = 0; yy < image_cross.height; yy++)
 			for(int xx = 0; xx < image_cross.width; xx++)
 			{
+                //Gets the color and position of the symbol
 				long int pos = (image_cross.width * yy + xx) * image_cross.bytes_per_pixel;
 				uint16_t color = image_cross.pixel_data[pos];
 
-				//Do not draw if nothing
+				//Skip if the color is suposed to be blank
 				if(color == 0)
 					continue;
 
-				//printf("%d %d %d\n", xx, yy, color);
 				screen[((yOffset + yy) * 320) + xOffset + xx] = color;
 			}
 
     }
-    else if (board[x][y] == 2){
-		//Offset for line
-		int xOffset = 10*x + 100*x;
-		int yOffset = 10*y + 73*y;
-
+    else if (board[x][y] == 2)
+    {
 		for(int yy = 0; yy < image_circle.height; yy++)
+        {
 			for(int xx = 0; xx < image_circle.width; xx++)
 			{
+                //Gets the color and position of the symbol
 				long int pos = (image_circle.width * yy + xx) * image_circle.bytes_per_pixel;
 				uint16_t color = image_circle.pixel_data[pos];
 
-				//Do not draw if nothing
+				//Skip if the color is suposed to be blank
 				if(color == 0)
 					continue;
 
 				screen[((yOffset + yy) * 320) + xOffset + xx] = color;
 			}
+        }
 	}
-	else if(!marker)
+    //Redraw the squares background color
+	else if(!active)
 		for(int y = 0; y < image_circle.height; y++)
 			for(int x = 0; x < image_circle.width; x++)
 				screen[((yOffset + y) * 320) + xOffset + x] = FOREGROUND;
 
+    //Redraws the exact squre that was changed
 	rect.dx = xOffset;
     rect.dy = yOffset;
     rect.width = 100;
@@ -221,12 +223,46 @@ void drawLocation(int y, int x)
     ioctl(framebuffer, 0x4680, &rect);
 }
 
-void interrupt_handler(int n, siginfo_t *info, void *unused) {
+void interrupt_handler(int n, siginfo_t *info, void *unused) 
+{
     uint8_t buttons = (uint8_t) (info->si_int);
 
-    //Propagate the event here. [0 4] Up, down, left, right, click
-    tictactoe_event(buttons);
+    int newx = posX;
+    int newy = posY;
+
+    if(event == 1)
+    {
+        newx--;
+    }
+    else if(event == 2)
+    {
+        newy--;
+    }
+    else if(event == 4)
+    {
+        newx++;
+    }
+    else if(event == 8)
+    {
+        newy++;
+    }
+    else if(event == 128)
+    {
+        if(frame_available() == 1)
+            select_frame();
+        else
+            printf("Square taken\n");
+    }
+
+    if(newy != posY || newx != posX)
+    {
+        if(check_move(newx, newy) == 1)
+            move(newx, newy);
+        else
+            printf("Illegal move\n");
+    }
 }
+
 
 int check_move(int x, int y)
 {
@@ -301,43 +337,4 @@ int hasWon()
     
     
     return 0;
-}
-
-void tictactoe_event(uint8_t event)
-{
-    int newx = posX;
-    int newy = posY;
-
-    if(event == 1)
-    {
-        newx--;
-    }
-    else if(event == 2)
-    {
-        newy--;
-    }
-    else if(event == 4)
-    {
-        newx++;
-    }
-    else if(event == 8)
-    {
-        newy++;
-    }
-    else if(event == 128)
-    {
-        if(frame_available() == 1)
-            select_frame();
-        else
-            printf("Square taken\n");
-    }
-
-    if(newy != posY || newx != posX)
-    {
-        if(check_move(newx, newy) == 1)
-    		move(newx, newy);
-        else
-            printf("Illegal move\n");
-    }
-
 }
