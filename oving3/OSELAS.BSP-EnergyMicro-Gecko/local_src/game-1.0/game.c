@@ -133,17 +133,11 @@ int main(int argc, char *argv[])
 
 void drawGame()
 {
-    //Setup the draw area
-    rect.dx = xOffset;
-    rect.dy = yOffset;
-    rect.width = 100;
-    rect.height = 73;
-
     //Draw all the squares
     for(int y = 0; y < 3; y++)
         for(int x = 0; x < 3; x++)
 			drawLocation(y, x);
-	
+
 
     //Command driver to update display
     //ioctl(framebuffer, 0x4680, &rect);
@@ -211,11 +205,15 @@ void drawLocation(int y, int x)
 				screen[((yOffset + yy) * 320) + xOffset + xx] = color;
 			}
 	}
-	// else if(!marker)
-	// 	for(int y = 0; y < image_circle.height; y++)
-	// 		for(int x = 0; x < image_circle.width; x++)
-	// 			screen[((yOffset + y) * 320) + xOffset + x] = FOREGROUND;
+	else if(!marker)
+		for(int y = 0; y < image_circle.height; y++)
+			for(int x = 0; x < image_circle.width; x++)
+				screen[((yOffset + y) * 320) + xOffset + x] = FOREGROUND;
 
+	rect.dx = xOffset;
+    rect.dy = yOffset;
+    rect.width = 100;
+    rect.height = 73;
     ioctl(framebuffer, 0x4680, &rect);
 }
 
