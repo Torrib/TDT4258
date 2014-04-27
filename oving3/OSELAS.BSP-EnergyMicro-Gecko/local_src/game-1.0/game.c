@@ -170,7 +170,7 @@ void drawLocation(int y, int x)
     	//memset(screen + yOffset * vinfo.xres + xOffset, 0x0000, 100 * 73 * vinfo.bits_per_pixel / 8);
 
 	/* Draw game items of there is any */
-   if(board[y][x] ==  1)
+   if(board[x][y] ==  1)
     {
 		for(int yy = 0; yy < image_cross.height; yy++)
 			for(int xx = 0; xx < image_cross.width; xx++)
@@ -187,7 +187,7 @@ void drawLocation(int y, int x)
 			}
 
     }
-    else if (board[y][x] == 2){
+    else if (board[x][y] == 2){
 		//Offset for line
 		int xOffset = 10*x + 100*x;
 		int yOffset = 10*y + 73*y;
