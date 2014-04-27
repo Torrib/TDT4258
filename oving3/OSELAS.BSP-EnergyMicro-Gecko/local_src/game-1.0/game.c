@@ -34,7 +34,10 @@ int init_tictactoe();
 void tictactoe_event(uint8_t event);
 
 //protos for drawing
+/** Low level draw method */
 void draw(int x, int y, uint16_t color);
+/** Hook for drawing the current game state */
+void drawGame();
 
 //Consts for drawing
 struct fb_var_screeninfo vinfo;
@@ -103,13 +106,7 @@ int main(int argc, char *argv[])
     // The game begins!
     init_tictactoe();
 
-    for(int i = 0; i < 10; i++)
-        for(int y = 0; y < 50; y++)
-			draw(i, y, 100);
-            //framebuffer[i * 320 + y] = 0xFFFF;
-
-    while(1){}
-
+	return 0;
 }
 
 void draw(int x, int y, uint16_t color)
@@ -120,12 +117,24 @@ void draw(int x, int y, uint16_t color)
 
 	//Draw at the location
     *(screen + location) = color;
+}
 
+void drawGame()
+{
+
+	//Empty the memory
+	memset(framebuffer, 0x0000, 320*240*2);
+
+	/* Draw the board using the draw method*/
+    for(int i = 0; i < 100; i++)
+        for(int y = 0; y <250; y++)
+		{
+			draw(i, y, 100);
+			framebuffer[i * 320 + y] = 100;
+		}
 	//Command driver to update display
 	ioctl(framebuffer, 0x4680, &rect);
 }
-
-
 
 void interrupt_handler(int n, siginfo_t *info, void *unused) {
     uint8_t buttons = (uint8_t) (info->si_int);
@@ -150,6 +159,8 @@ int init_tictactoe()
     char board[3][3];
 
     initializeBoard(board);
+
+	drawGame();
 
     while (play == 1) {
         while (hasTurn == 1) {
@@ -176,6 +187,8 @@ int init_tictactoe()
                 hasTurn = 2;
         }
 
+		drawGame();		
+
         //Do the same for player two - is there a way to do this without the loops?
 
         while (hasTurn == 2) {
@@ -200,6 +213,8 @@ int init_tictactoe()
                 hasTurn = 1;
 
         }
+
+		drawGame();
     }
 
     return 0;
