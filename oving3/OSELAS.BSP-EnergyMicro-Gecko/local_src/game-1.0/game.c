@@ -40,6 +40,8 @@ void draw(int x, int y, uint16_t color);
 struct fb_var_screeninfo vinfo;
 struct fb_fix_screeninfo finfo;
 
+struct fb_copyarea rect;
+
 int main(int argc, char *argv[])
 {
     printf("Starting game\n");
@@ -77,12 +79,19 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+	//Setup the draw area
+	rect.dx = 0;
+	rect.dy = 0;
+	rect.width = 320;
+	rect.height = 240;
+
     //Initiate the screen
     screen = (uint16_t *) mmap(NULL, 320*240*2, PROT_READ | PROT_WRITE, MAP_SHARED, framebuffer, 0);
 
     if(screen == NULL)
         return 1;
 
+	// Setup signal handling
     struct sigaction sign;
     sign.sa_sigaction = interrupt_handler;
     sign.sa_flags = SA_SIGINFO;
@@ -96,7 +105,7 @@ int main(int argc, char *argv[])
 
     for(int i = 0; i < 10; i++)
         for(int y = 0; y < 50; y++)
-		draw(i, y, 100);
+			draw(i, y, 100);
             //framebuffer[i * 320 + y] = 0xFFFF;
 
     while(1){}
@@ -111,7 +120,12 @@ void draw(int x, int y, uint16_t color)
 
 	//Draw at the location
     *(screen + location) = color;
+
+	//Command driver to update display
+	ioctl(framebuffer, 0x4680, &rect);
 }
+
+
 
 void interrupt_handler(int n, siginfo_t *info, void *unused) {
     uint8_t buttons = (uint8_t) (info->si_int);
