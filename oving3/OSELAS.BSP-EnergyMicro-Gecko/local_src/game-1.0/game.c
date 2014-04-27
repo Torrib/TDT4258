@@ -1,11 +1,3 @@
-//
-//  game.c
-//  oving3-xcode
-//
-//  Created by Pia Lindkjølen on 27.04.14.
-//  Copyright (c) 2014 Pia Lindkjølen. All rights reserved.
-//
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <linux/fb.h>
@@ -19,7 +11,6 @@
 #include <string.h>
 #include <signal.h>
 
-
 int framebuffer;
 int gamepad;
 
@@ -30,7 +21,7 @@ void initializeBoard(char[][3]);
 void printBoard(char[][3]);
 int hasWon(char[][3], int hasTurn);
 int moveAllowed(char[][3], int *column,int *row);
-static void interrupt_handler(int, siginfo_t*, void*);
+void interrupt_handler(int, siginfo_t*, void*);
 void init_tictactoe();
 
 int main(int argc, char *argv[])
