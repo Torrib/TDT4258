@@ -81,7 +81,7 @@ static int __init my_driver_init(void)
     write_register(GPIO_PC_DOUT, 0xFF);
     write_register(GPIO_IEN, 0xFF);
     write_register(GPIO_EXTIPSELL, 0x22222222);
-    write_register(GPIO_EXTIRISE, 0xFF);
+    //write_register(GPIO_EXTIRISE, 0xFF);
     write_register(GPIO_EXTIFALL, 0xFF);
     write_register(GPIO_IFC, 0xFFFF);
 
