@@ -113,7 +113,7 @@ static int __init my_driver_init(void)
     device_create(cl, NULL, devicenumber, NULL, NAME);
 
     memwrite(EMU_CTRL, 0, 0);
-    memwrite(SCR, 0, 4);
+    memwrite(SCR, 0, 6);
 
     printk(KERN_INFO "Gamepad driver started");
 
