@@ -147,7 +147,7 @@ void printBoard(char board[][3]){
     }
 }
 
-void tictactoe_event(int event)
+void tictactoe_event(uint8_t event)
 {
-
+    printf(event);
 }
