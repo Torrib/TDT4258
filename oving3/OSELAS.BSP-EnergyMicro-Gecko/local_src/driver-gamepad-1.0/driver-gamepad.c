@@ -54,7 +54,7 @@ void __iomem *gpio;
 char output;
 struct task_struct *task;
 struct siginfo signal_info;
-struct semaphores sem;
+struct semaphore sem;
 uint8_t driver_enabled = 0;
 
 /** Class for userspace /dev/NAME file */
