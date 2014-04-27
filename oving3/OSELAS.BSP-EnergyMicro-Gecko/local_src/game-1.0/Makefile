@@ -11,7 +11,10 @@ CPPFLAGS +=
 LDFLAGS +=
 
 
-all: game 
+all: game
+
+game: game.c cross.h
+	${CC} ${CFLAGS} game.c cross.h
 
 clean:
 	-rm -f game
