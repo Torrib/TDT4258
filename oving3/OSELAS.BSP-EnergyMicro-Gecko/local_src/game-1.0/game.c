@@ -17,6 +17,10 @@
 #include "cross.h"
 #include "circle.h"
 
+#define BACKGROUND 0x0000
+#define FOREGROUND 0x3333
+#define HIGHLIGHT 0x7777
+
 int framebuffer;
 int gamepad;
 
@@ -111,7 +115,7 @@ int main(int argc, char *argv[])
     sprintf(pid_buf, "%d", getpid());
     write(gamepad, pid_buf, strlen(pid_buf) +1);
 
-    memset(screen, 0x0000, framebuffer_size);
+    memset(screen, FOREGROUND, framebuffer_size);
 	//Setup the draw area
     rect.dx = 0;
     rect.dy = 0;
@@ -162,7 +166,7 @@ void drawLocation(int y, int x)
 
 	//Offset for our working area
 	int xOffset = 10*x + 100*x;
-	int yOffset = 10*y + 74*y;
+	int yOffset = 10*y + 73*y;
 
 	//Draw the current marker field
 	if(posX == x && posY == y)
@@ -172,14 +176,14 @@ void drawLocation(int y, int x)
 		for(int y = 0; y < image_circle.height; y++)
 			for(int x = 0; x < image_circle.width; x++)
 			{
-				screen[((yOffset + y) * 320) + xOffset + x] = 0x7777;
+				screen[((yOffset + y) * 320) + xOffset + x] = HIGHLIGHT;
 			}
 	}
 	else // Remove the marked location showing
 		for(int y = 0; y < image_circle.height; y++)
 			for(int x = 0; x < image_circle.width; x++)
-				screen[((yOffset + y) * 320) + xOffset + x] = 0x3333;
-    	//memset(screen + yOffset * vinfo.xres + xOffset, 0x0000, 100 * 74 * vinfo.bits_per_pixel / 8);
+				screen[((yOffset + y) * 320) + xOffset + x] = BACKGROUND;
+    	//memset(screen + yOffset * vinfo.xres + xOffset, 0x0000, 100 * 73 * vinfo.bits_per_pixel / 8);
 
 	/* Draw game items of there is any */
    if(board[y][x] ==  1)
@@ -202,7 +206,7 @@ void drawLocation(int y, int x)
     else if (board[y][x] == 2){
 		//Offset for line
 		int xOffset = 10*x + 100*x;
-		int yOffset = 10*y + 74*y;
+		int yOffset = 10*y + 73*y;
 
 		for(int yy = 0; yy < image_circle.height; yy++)
 			for(int xx = 0; xx < image_circle.width; xx++)
@@ -220,12 +224,12 @@ void drawLocation(int y, int x)
 	else if(!marker)
 		for(int y = 0; y < image_circle.height; y++)
 			for(int x = 0; x < image_circle.width; x++)
-				screen[((yOffset + y) * 320) + xOffset + x] = 0x3333;
+				screen[((yOffset + y) * 320) + xOffset + x] = FOREGROUND;
 
 	rect.dx = xOffset;
     rect.dy = yOffset;
     rect.width = 100;
-    rect.height = 74;
+    rect.height = 73;
     ioctl(framebuffer, 0x4680, &rect);
 }
 
