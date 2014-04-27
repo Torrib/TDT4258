@@ -12,7 +12,7 @@
 #include <linux/types.h>
 #include <linux/rcupdate.h>
 #include <linux/sched.h>
-
+#include <linux/semaphore.h>
 #include <linux/device.h>
 
 #include <asm/io.h>
@@ -54,6 +54,7 @@ void __iomem *gpio;
 char output;
 struct task_struct *task;
 struct siginfo signal_info;
+struct semaphores sem;
 uint8_t driver_enabled = 0;
 
 /** Class for userspace /dev/NAME file */
@@ -151,18 +152,20 @@ uint32_t memread(void *base, uint32_t offset)
 
 static int driver_open(struct inode *inode, struct file *filp)
 {
-    if(driver_enabled == 0) {
+    if(down_interruptible(&sem) == 0) {
         driver_enabled = 1;
         return 0;
     }
-    printk(KERN_INFO "Unable to open gamepad driver");
-    return 0;
+
+    printk(KERN_ALERT "Unable to open gamepad driver");
+    return -1;
 }
 
 static int driver_release(struct inode *inode, struct file *filp)
 {
     driver_enabled = 0;
     printk(KERN_INFO "Gamepad driver closed");
+    up(&sem);
     return 0;
 }
 
@@ -213,11 +216,11 @@ static irqreturn_t interrupt_handler(int irq, void *dev_id, struct pt_regs * reg
     if(driver_enabled)
     {
         int status = send_sig_info(50, &signal_info, task);
-        if (status < 0) 
+        if (status < 0)
         {
             printk("Unable to send interrupt\n");
             return -1;
-        }       
+        }
     }
     else
     {
