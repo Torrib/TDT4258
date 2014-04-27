@@ -123,8 +123,8 @@ int main(int argc, char *argv[])
     //Starts the game
     init_tictactoe();
 
-    EMU_CTRL = 0;
-    SCR = 6;
+    *EMU_CTRL = 0;
+    *SCR = 6;
     __asm("wfi");
 
     return 0;
