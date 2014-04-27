@@ -68,7 +68,7 @@ static int __init my_driver_init(void)
     check_mem_region(GPIO_BASE, GPIO_SIZE);
     request_mem_region(GPIO_BASE, GPIO_SIZE, NAME);
 
-    //makes memory accessable
+    //makes memory accessable and gets the base value for GPIO operations
     gpio = ioremap_nocache(GPIO_BASE, GPIO_SIZE);
 
     //Set up GPIO
@@ -155,7 +155,7 @@ static int driver_open(struct inode *inode, struct file *filp)
         driver_enabled = 1;
         return 0;
     }
-    printk(KERN_INFO "Unable to open gamepad driver";
+    printk(KERN_INFO "Unable to open gamepad driver");
     return 0;
 }
 
@@ -182,7 +182,7 @@ static ssize_t driver_write(struct file *filp, const char __user *buffer, size_t
 
 
     //Copy userspace data to the buffer
-    copy_from_user(pid_array, buff, count);
+    copy_from_user(pid_array, buffer, count);
     sscanf(pid_array, "%d", &pid);
 
     //Locks the RCU while writing
@@ -222,7 +222,7 @@ static irqreturn_t interrupt_handler(int irq, void *dev_id, struct pt_regs * reg
     else
     {
         printk("Driver not enabled\n");
-        return -1
+        return -1;
     }
 
 	return IRQ_HANDLED;
