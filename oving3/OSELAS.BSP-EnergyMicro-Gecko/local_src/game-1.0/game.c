@@ -11,6 +11,9 @@
 #include <string.h>
 #include <signal.h>
 #include <linux/fb.h>
+#include <inttypes.h>
+
+#include "cross.h"
 
 int framebuffer;
 int gamepad;
@@ -37,7 +40,7 @@ void tictactoe_event(uint8_t event);
 /** Low level draw method */
 void draw(int x, int y, uint16_t color);
 /** Hook for drawing the current game state */
-void drawGame();
+void drawGame(char board[][3]);
 
 //Consts for drawing
 struct fb_var_screeninfo vinfo;
@@ -95,13 +98,13 @@ int main(int argc, char *argv[])
     //Initiate the screen
     screen = (uint16_t *) mmap(NULL, framebuffer_size, PROT_READ | PROT_WRITE, MAP_SHARED, framebuffer, 0);
 
-    if(screen == -1)
+    if(*screen == -1)
 	{
-		printf("Error: Mapping memory failed with code %d \n", screen);
+		printf("Error: Mapping memory failed with code %"PRIu16"\n", screen);
         return 1;
 	}
 
-	printf("Framebuffer size: %d\nFramebuffer address: %d\n", framebuffer_size, screen);
+	printf("Framebuffer size: %ld\nFramebuffer address: %"PRIu16"\n", framebuffer_size, screen);
 	printf("vinfo.xoffset=%d\nvinfo.yoffset=%d\nvinfo.bits_per_pixel=%d\nfinfo.line_length=%d\n",
 		vinfo.xoffset, vinfo.yoffset, vinfo.bits_per_pixel, finfo.line_length);
 
@@ -133,7 +136,7 @@ void draw(int x, int y, uint16_t color)
     //*(screen + location) = 0;
 }
 
-void drawGame()
+void drawGame(char board[][3])
 {
 	//Empty the memory
 	memset(screen, 0x0000, framebuffer_size);
@@ -145,6 +148,27 @@ void drawGame()
 			draw(i, y, 100);
 			//screen[i * 320 + y] = 0xffff;
 		}
+
+    for(int y = 0; y < 3; y++)
+        for(int x = 0; x < 3; x++)
+        {
+            if(board[y][x] ==  'X')
+            {
+                //Offset for line
+                int xOffset = 10*x + 100*x;
+                int yOffset = 10*y + 74*y;
+
+                for(int yy = 0; yy < cross_image.height; yy++)
+                    for(int xx = 0; xx < cross_image.width; xx++)
+                    {
+                        uint16_t color = cross_image.pixel_data[cross_image.width * yy + xx * cross_image.bytes_per_pixel];
+
+                        screen[xOffset * 320 + yOffset] = color;
+                    }
+
+            }
+            else if (board[y][x] == 'Y'){}
+        }
 
 	//Command driver to update display
 	ioctl(framebuffer, 0x4680, &rect);
@@ -174,7 +198,7 @@ int init_tictactoe()
 
     initializeBoard(board);
 
-	drawGame();
+	drawGame(board);
 
     while (play == 1) {
         while (hasTurn == 1) {
@@ -201,7 +225,7 @@ int init_tictactoe()
                 hasTurn = 2;
         }
 
-		drawGame();
+		drawGame(board);
 
         //Do the same for player two - is there a way to do this without the loops?
 
@@ -228,7 +252,7 @@ int init_tictactoe()
 
         }
 
-		drawGame();
+		drawGame(board);
     }
 
     return 0;
