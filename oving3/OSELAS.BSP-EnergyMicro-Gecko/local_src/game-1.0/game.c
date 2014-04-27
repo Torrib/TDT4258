@@ -38,14 +38,12 @@ void tictactoe_event(uint8_t event);
 void draw(int x, int y, uint16_t color);
 /** Hook for drawing the current game state */
 void drawGame();
+void map(uint16_t **region, int fd);
 
 //Consts for drawing
-struct fb_var_screeninfo vinfo;
-struct fb_fix_screeninfo finfo;
 
 struct fb_copyarea rect;
 
-uint16_t framebuffer_size;
 
 int main(int argc, char *argv[])
 {
@@ -63,20 +61,6 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-
-	/* get fixed info*/
-	if(ioctl(framebuffer, FBIOGET_VSCREENINFO, &vinfo))
-	{
-		printf("Error reading fixed framebuffer info\n");
-		return 1;
-	}
-
-	if(ioctl(framebuffer, FBIOGET_VSCREENINFO, &vinfo))
-	{
-		printf("Error reading variable framebuffer info\n");
-		return 1;
-	}
-
     gamepad = open("/dev/gamepad", O_RDWR);
     if(gamepad < 0)
     {
@@ -90,10 +74,9 @@ int main(int argc, char *argv[])
 	rect.width = 320;
 	rect.height = 240;
 
-	framebuffer_size = vinfo.xres * vinfo.yres * vinfo.bits_per_pixel / 8;
-
     //Initiate the screen
-   	*screen = (uint16_t *) mmap(NULL, framebuffer_size, PROT_READ | PROT_WRITE, MAP_SHARED, framebuffer, 0);
+   	map(&screen, framebuffer);
+    printf("%d", *screen);
 	
     if(screen == -1)
 	{
@@ -101,7 +84,6 @@ int main(int argc, char *argv[])
         return 1;
 	}
 	
-	printf("Framebuffer size: %d\nFramebuffer address: %d\n", framebuffer_size, screen);
 
 	// Setup signal handling
     struct sigaction sign;
@@ -116,6 +98,11 @@ int main(int argc, char *argv[])
     init_tictactoe();
 
 	return 0;
+}
+
+void map(uint16_t **region, int fd)
+{
+    *region = (uint16_t *) mmap(NULL, 320 * 240 * 2, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
 }
 
 void draw(int x, int y, uint16_t color)
@@ -143,8 +130,8 @@ void drawGame()
     for(int i = 0; i < 100; i++)
         for(int y = 0; y <250; y++)
 		{
-			draw(i, y, 100);
-			//screen[i * 320 + y] = 0xffff;
+			//draw(i, y, 100);
+			screen[i * 320 + y] = 0xffff;
 		}
 
 	//Command driver to update display
