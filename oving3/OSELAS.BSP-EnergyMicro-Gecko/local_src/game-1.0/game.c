@@ -65,13 +65,13 @@ int main(int argc, char *argv[])
 	/* get fixed info*/
 	if(ioctl(framebuffer, FBIOGET_VSCREENINFO, &vinfo))
 	{
-		printf("Error reading fixed framebuffer info");
+		printf("Error reading fixed framebuffer info\n");
 		return 1;
 	}
 
 	if(ioctl(framebuffer, FBIOGET_VSCREENINFO, &vinfo))
 	{
-		printf("Error reading variable framebuffer info");
+		printf("Error reading variable framebuffer info\n");
 		return 1;
 	}
 
@@ -89,10 +89,13 @@ int main(int argc, char *argv[])
 	rect.height = 240;
 
     //Initiate the screen
-    screen = (uint16_t *) mmap(NULL, 320*240*2, PROT_READ | PROT_WRITE, MAP_SHARED, framebuffer, 0);
+   	screen = (uint16_t *) mmap(NULL, 320*240*2, PROT_READ | PROT_WRITE, MAP_SHARED, framebuffer, 0);
 
-    if(screen == NULL)
+    if(*screen == 0)
+	{
+		printf("Error: Mapping memory failed\n");
         return 1;
+	}
 
 	// Setup signal handling
     struct sigaction sign;
@@ -116,22 +119,25 @@ void draw(int x, int y, uint16_t color)
         + (y + vinfo.xoffset) * finfo.line_length;
 
 	//Draw at the location
-    *(screen + location) = color;
+    *(screen + location) = 0xffff;
+    //*(screen + location + 1) = 20;
+    //*(screen + location + 2) = 200;
+    //*(screen + location) = 0;
 }
 
 void drawGame()
 {
-
 	//Empty the memory
-	memset(framebuffer, 0x0000, 320*240*2);
+	memset(screen, 0x0000, 320*240*2);
 
 	/* Draw the board using the draw method*/
     for(int i = 0; i < 100; i++)
         for(int y = 0; y <250; y++)
 		{
 			draw(i, y, 100);
-			framebuffer[i * 320 + y] = 100;
+			//framebuffer[i * 320 + y] = 0xffff;
 		}
+
 	//Command driver to update display
 	ioctl(framebuffer, 0x4680, &rect);
 }
