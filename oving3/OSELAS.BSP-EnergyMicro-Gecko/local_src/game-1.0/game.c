@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
 	write(gamepad, pid_buf, strlen(pid_buf) +1);
     
     // The game begins!
-    init_tictactoe(;
+    init_tictactoe();
     
 	while(1)
 	{
