@@ -139,11 +139,11 @@ void drawGame()
 	memset(screen, 0x0000, framebuffer_size);
 
 	/* Draw the board using the draw method*/
-    for(int i = 0; i < 100; i++)
+    for(int x = 0; x < 150; x++)
         for(int y = 0; y <250; y++)
 		{
 			//draw(i, y, 100);
-			screen[i * 320 + y] = 0xffff;
+			screen[x * 320 + y] = 0xffff;
 		}
 
 	//Command driver to update display
