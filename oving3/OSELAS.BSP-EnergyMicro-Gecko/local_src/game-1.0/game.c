@@ -1,11 +1,3 @@
-//
-//  game.c
-//  oving3-xcode
-//
-//  Created by Pia Lindkjølen on 27.04.14.
-//  Copyright (c) 2014 Pia Lindkjølen. All rights reserved.
-//
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <linux/fb.h>
@@ -18,7 +10,6 @@
 #include <unistd.h>
 #include <string.h>
 #include <signal.h>
-
 
 int framebuffer;
 int gamepad;
@@ -74,7 +65,11 @@ int main(int argc, char *argv[])
     
     // The game begins!
     init_tictactoe();
-    
+/*
+    for(int i = 0; i < 10; i++)
+    	for(int y = 0; y < 50; y++)
+    		framebuffer[i * 320 + y] = 0xFFFF;
+  */  
 	while(1)
 	{
         
