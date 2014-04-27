@@ -47,7 +47,6 @@ int main(int argc, char *argv[])
 	//Open the framebuffer file
 	framebuffer = open("/dev/fb0", O_RDWR);
     
-    int s = write();
 	//Exit if the framebuffer file does not exist or cant be opened.
 	if(framebuffer < 0)
 	{
