@@ -41,6 +41,7 @@ void tictactoe_event(uint8_t event);
 int posx = 1;
 int posy = 1;
 int active_player = 1;
+int running = 1;
 
 int board[3][3]; 
 
@@ -193,50 +194,15 @@ void interrupt_handler(int n, siginfo_t *info, void *unused) {
  */
 int init_tictactoe()
 {
-    printf("Game initializing");
+    printf("Game initializing\n");
 
-    int play = 1;
-<<<<<<< HEAD
     initialize_board();
 
     //drawGame(board);
 
-    while (play == 1) 
+    while (running == 1) 
     {
         //TODO indikate active square
-=======
-    int column, row;
-    char board[3][3];
-
-    initializeBoard(board);
-
-    while (play == 1) {
-        while (hasTurn == 1) {
-            printBoard(board);
-            printf("Player 1 - Choose column 0 - 2 :\n");
-            scanf("%d", &column);
-            printf("Player 1 - Choose row 0 - 2 :\n");
-            scanf("%d", &row);
-
-            //Check if the column and row is allowed
-            //Should be in a method
-
-            if(moveAllowed(board, &column, &row) == 1)
-                board[column][row] = 'X';
-            else
-                printf("Column or row not valid - try again.\n");
-
-            //Check if player 1 won
-            if (hasWon(board,hasTurn) == 1){
-                printf("%s", "Player 1 won!");
-                play = 0;
-            }
-            else
-                hasTurn = 2;
-        }
-
-        //Do the same for player two - is there a way to do this without the loops?
->>>>>>> 85b3a092ea7b1657d9338515b6d33b9520be9970
 
     }
 
@@ -274,7 +240,7 @@ void select_frame()
     if(hasWon() == 1)
     {
         printf("Player %d won!\n", active_player);
-        play = 0;
+        running = 0;
         return;
     }
 
