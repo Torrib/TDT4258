@@ -123,7 +123,10 @@ int main(int argc, char *argv[])
     //Starts the game
     init_tictactoe();
 
-      __asm("wfi");
+    memwrite(EMU_CTRL, 0, 0);
+    memwrite(SCR, 0, 4);
+
+    __asm("wfi");
 
     return 0;
 }
@@ -340,4 +343,9 @@ int hasWon()
     
     
     return 0;
+}
+
+void memwrite(void *base, uint32_t offset, uint32_t value)
+{
+    *(volatile uint32_t *) ((uint32_t) base + offset) = value;
 }
