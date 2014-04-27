@@ -74,6 +74,10 @@ int main(int argc, char *argv[])
     
     // The game begins!
     init_tictactoe();
+
+    for(int i = 0; i < 10; i++)
+    	for(int y = 0; y < 50; y++)
+    		framebuffer[i * 320 + y] = 0xFFFF;
     
 	while(1)
 	{
