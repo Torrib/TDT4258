@@ -126,8 +126,6 @@ int main(int argc, char *argv[])
     // The game begins!
     init_tictactoe();
 
-    while(1){}
-
     return 0;
 }
 
@@ -258,9 +256,6 @@ void move(int x, int y)
 
 	// Null out the last area
 	drawLocation(tempY, tempX);
-
-    printf("%d-%d\n", x, y);
-
 }
 
 int frame_available()
