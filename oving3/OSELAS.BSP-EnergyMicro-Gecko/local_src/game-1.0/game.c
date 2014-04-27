@@ -62,12 +62,10 @@ int main(int argc, char *argv[])
 {
     printf("Starting game\n");
 
-    char pid_buf[10];
-
     //Open the framebuffer file
     framebuffer = open("/dev/fb0", O_RDWR);
 
-    //Exit if the framebuffer file does not exist or cant be opened.
+    //Exit if the framebuffer file does not exist or can't be opened.
     if(framebuffer < 0)
     {
         printf("Error opening frame buffer\n");
@@ -75,18 +73,19 @@ int main(int argc, char *argv[])
     }
 
 
-    /* get fixed info*/
+    //Gets static information about the framebuffer (Screensize etc)
     if(ioctl(framebuffer, FBIOGET_VSCREENINFO, &vinfo))
     {
         printf("Error reading fixed framebuffer info\n");
         return 1;
     }
 
-    if(ioctl(framebuffer, FBIOGET_VSCREENINFO, &vinfo))
-    {
-        printf("Error reading variable framebuffer info\n");
-        return 1;
-    }
+    //Gets dynamic information about the framebuffer (?)
+    // if(ioctl(framebuffer, FBIOGET_VSCREENINFO, &vinfo))
+    // {
+    //     printf("Error reading variable framebuffer info\n");
+    //     return 1;
+    // }
 
     gamepad = open("/dev/gamepad", O_RDWR);
     if(gamepad < 0)
@@ -112,8 +111,9 @@ int main(int argc, char *argv[])
     sign.sa_flags = SA_SIGINFO;
     sigaction(50, &sign, NULL);
 
-    sprintf(pid_buf, "%d", getpid());
-    write(gamepad, pid_buf, strlen(pid_buf) +1);
+    char pid_array[5];
+    sprintf(pid_array, "%d", getpid());
+    write(gamepad, pid_array, strlen(pid_array) +1);
 
     memset(screen, BACKGROUND, framebuffer_size);
 	//Setup the draw area
