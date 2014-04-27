@@ -13,7 +13,9 @@
 #include <linux/fb.h>
 #include <inttypes.h>
 
+
 #include "cross.h"
+#include "circle.h"
 
 int framebuffer;
 int gamepad;
@@ -150,27 +152,44 @@ void drawGame(char board[][3])
 			screen[x * 320 + y] = 0xffff;
 		}*/
 	board[0][1] = 'X';
+	board[2][2] = 'O';
     for(int y = 0; y < 3; y++)
         for(int x = 0; x < 3; x++)
         {
             if(board[y][x] ==  'X')
             {
-                //Offset for line
-                int xOffset = 10*x + 100*x;
-                int yOffset = 10*y + 74*y;
+				//Offset for line
+				int xOffset = 10*x + 100*x;
+				int yOffset = 10*y + 74*y;
 
-                for(int yy = 0; yy < cross_image.height; yy++)
-                    for(int xx = 0; xx < cross_image.width; xx++)
-                    {
-						long int pos = (cross_image.width * yy + xx) * cross_image.bytes_per_pixel;
-                        uint16_t color = cross_image.pixel_data[pos];
+				for(int yy = 0; yy < image_cross.height; yy++)
+					for(int xx = 0; xx < image_cross.width; xx++)
+					{
+						long int pos = (image_cross.width * yy + xx) * image_cross.bytes_per_pixel;
+						uint16_t color = image_cross.pixel_data[pos];
 
 						//printf("%d %d %d\n", xx, yy, color);
-                        screen[((yOffset + yy) * 320) + xOffset + xx] = color;
-                    }
+						screen[((yOffset + yy) * 320) + xOffset + xx] = color;
+					}
 
             }
-            else if (board[y][x] == 'Y'){}
+            else if (board[y][x] == 'O'){
+				//Offset for line
+				int xOffset = 10*x + 100*x;
+				int yOffset = 10*y + 74*y;
+
+				for(int yy = 0; yy < image_circle.height; yy++)
+					for(int xx = 0; xx < image_circle.width; xx++)
+					{
+						long int pos = (image_circle.width * yy + xx) * image_circle.bytes_per_pixel;
+						uint16_t color = image_circle.pixel_data[pos];
+
+						//printf("%d %d %d\n", xx, yy, color);
+						screen[((yOffset + yy) * 320) + xOffset + xx] = color;
+					}
+
+
+			}
         }
 
     //Command driver to update display
