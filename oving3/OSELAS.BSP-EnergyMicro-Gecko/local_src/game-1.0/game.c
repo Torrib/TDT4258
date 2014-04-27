@@ -34,7 +34,6 @@ void init_tictactoe();
 int hasWon();
 int check_move(int x, int y);
 void move(int x, int y);
-int frame_available();
 void drawLocation();
 void select_frame();
 
@@ -230,6 +229,7 @@ void interrupt_handler(int n, siginfo_t *info, void *unused)
     int newx = posX;
     int newy = posY;
 
+    //Checks the button pressed values
     if(event == 1)
     {
         newx--;
@@ -248,7 +248,8 @@ void interrupt_handler(int n, siginfo_t *info, void *unused)
     }
     else if(event == 128)
     {
-        if(frame_available() == 1)
+        //Checks if the square is taken, if it is free the player will pick it
+        if(board[posX][posY] == 0)
             select_frame();
         else
             printf("Square taken\n");
@@ -256,6 +257,7 @@ void interrupt_handler(int n, siginfo_t *info, void *unused)
 
     if(newy != posY || newx != posX)
     {
+        //Checks if the move is legal, if it is, the active square will be changed
         if(check_move(newx, newy) == 1)
             move(newx, newy);
         else
@@ -263,7 +265,7 @@ void interrupt_handler(int n, siginfo_t *info, void *unused)
     }
 }
 
-
+//Checks id a move is legal
 int check_move(int x, int y)
 {
     if(x > 2 || x < 0 || y > 2 || y < 0)
@@ -272,27 +274,22 @@ int check_move(int x, int y)
     return 1;
 }
 
+//Moves the active square
 void move(int x, int y)
 {
 	int tempY = posY;
 	int tempX = posX;
     posX = x;
     posY = y;
-	//Draw the new area	
+
+	//Draw the newly selected square
 	drawLocation(posY, posX);
 
-	// Null out the last area
+	//Redraw the previously selected square
 	drawLocation(tempY, tempX);
 }
 
-int frame_available()
-{
-    if(board[posX][posY] == 0)
-        return 1;
-    
-    return 0;
-}
-
+//Picks the selected frame
 void select_frame()
 {
     board[posX][posY] = active_player;
@@ -328,6 +325,7 @@ int hasWon()
         
     }
 
+    //Checks diagonals
     if((board[0][0] == active_player) && (board[0][0] == board[1][1]) && (board[1][1] == board[2][2]))
         return 1;
     
