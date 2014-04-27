@@ -30,16 +30,15 @@ typedef unsigned int uint32_t;
 
 static int __init my_driver_init(void);
 static void __exit my_driver_exit(void);
-static void write_register(void *base, uint32_t offset, uint32_t value);
-static uint32_t read_register(void *base, uint32_t offset);
+static void memwrite(void *base, uint32_t offset, uint32_t value);
+static uint32_t memread(void *base, uint32_t offset);
 static int driver_open(struct inode *inode, struct file *filep);
 static int driver_release(struct inode *inode, struct file *filep);
 static ssize_t driver_read(struct file *filep, char __user *buff, size_t count, loff_t *offp);
 static ssize_t driver_write(struct file *filep, const char __user *buff, size_t count, loff_t *offp);
-static irqreturn_t irq_handler(int irq, void *dummy, struct pt_regs * regs);
+static irqreturn_t interrupt_handler(int irq, void *dummy, struct pt_regs * regs);
 
-//File operation functions
-static struct file_operations driver_fops = {
+static struct file_operations file_ops = {
     .owner = THIS_MODULE,
     .read = driver_read,
     .write = driver_write,
@@ -74,26 +73,28 @@ static int __init my_driver_init(void)
 
     //Set up GPIO
 
-    write_register(gpio, GPIO_PA_CTRL, 0x2);
+    memwrite(gpio, GPIO_PA_CTRL, 0x2);
     //Set pins A8-15 to output
-    write_register(gpio, GPIO_PA_MODEH, 0x55555555);
-    write_register(gpio, GPIO_PA_DOUT, 0xFF00);
-    write_register(gpio, GPIO_PC_MODEL, 0x33333333);
-    write_register(gpio, GPIO_PC_DOUT, 0xFF);
+    memwrite(gpio, GPIO_PA_MODEH, 0x55555555);
+    memwrite(gpio, GPIO_PA_DOUT, 0xFF00);
+
+    //Sets pins 1-7 on PC to input
+    memwrite(gpio, GPIO_PC_MODEL, 0x33333333);
+    memwrite(gpio, GPIO_PC_DOUT, 0xFF);
 
     //Enable interrupt generation
-    write_register(gpio, GPIO_IEN, 0xFF);
-    write_register(gpio, GPIO_EXTIPSELL, 0x22222222);
+    memwrite(gpio, GPIO_IEN, 0xFF);
+    memwrite(gpio, GPIO_EXTIPSELL, 0x22222222);
 
     //Trigger interrupt on button press
-    write_register(gpio, GPIO_EXTIFALL, 0xFF);
+    memwrite(gpio, GPIO_EXTIFALL, 0xFF);
 
     //Clear interrupts
-    write_register(gpio, GPIO_IFC, 0xFFFF);
+    memwrite(gpio, GPIO_IFC, 0xFFFF);
 
     //Enable interruption generation
-    request_irq(17, irq_handler, 0, NAME, NULL);
-    request_irq(18, irq_handler, 0, NAME, NULL);
+    request_irq(17, interrupt_handler, 0, NAME, NULL);
+    request_irq(18, interrupt_handler, 0, NAME, NULL);
 
 
     //Setup signal sending, to trigger interrupts in the game.
@@ -102,7 +103,7 @@ static int __init my_driver_init(void)
     signal_info.si_code = SI_QUEUE;
 
     //Register driver
-    cdev_init(&gamepad_cdev, &driver_fops);
+    cdev_init(&gamepad_cdev, &file_ops);
     gamepad_cdev.owner = THIS_MODULE;
     cdev_add(&gamepad_cdev, devicenumber, 1);
 
@@ -135,15 +136,15 @@ static void __exit my_driver_exit(void)
     unregister_chrdev_region(devicenumber, 1);
 
 
-    printk(KERN_INFO "Gamepad driver unloaded");
+    printk(KERN_INFO "Gamepad driver closed");
 }
 
-void write_register(void *base, uint32_t offset, uint32_t value)
+void memwrite(void *base, uint32_t offset, uint32_t value)
 {
     *(volatile uint32_t *) ((uint32_t) base + offset) = value;
 }
 
-uint32_t read_register(void *base, uint32_t offset)
+uint32_t memread(void *base, uint32_t offset)
 {
     return *(volatile uint32_t *) ((uint32_t) base + offset);
 }
@@ -151,17 +152,17 @@ uint32_t read_register(void *base, uint32_t offset)
 static int driver_open(struct inode *inode, struct file *filp)
 {
     if(driver_enabled == 0) {
-        driver_enabled++;
+        driver_enabled = 1;
         return 0;
     }
-    printk(KERN_INFO "%s driver_enabled\n", NAME);
+    printk(KERN_INFO "Unable to open gamepad driver";
     return 0;
 }
 
 static int driver_release(struct inode *inode, struct file *filp)
 {
-    driver_enabled--;
-    printk(KERN_INFO "%s closed\n", NAME);
+    driver_enabled = 0;
+    printk(KERN_INFO "Gamepad driver closed");
     return 0;
 }
 
@@ -170,21 +171,23 @@ static ssize_t driver_read(struct file *filp, char __user *buff, size_t count, l
     return count;
 }
 
-static ssize_t driver_write(struct file *filp, const char __user *buff, size_t count, loff_t *offp)
+static ssize_t driver_write(struct file *filp, const char __user *buffer, size_t count, loff_t *offp)
 {
-    char pid_string[5];
+    char pid_array[5];
     int pid = 0;
 
+    //return if the pid is to big
     if(count > 5)
         return -1;
 
-    /* read the value from user space */
 
-    //Copy input from userspace to local buffer
-    copy_from_user(pid_string, buff, count);
-    sscanf(pid_string, "%d", &pid);
+    //Copy userspace data to the buffer
+    copy_from_user(pid_array, buff, count);
+    sscanf(pid_array, "%d", &pid);
 
+    //Locks the RCU while writing
     rcu_read_lock();
+    //Finds the task based on the PID
     task = pid_task(find_pid_ns(pid, &init_pid_ns), PIDTYPE_PID);
     if(task == NULL){
         printk("Error: Could not find the task with pid: %d\n", pid);
@@ -195,18 +198,31 @@ static ssize_t driver_write(struct file *filp, const char __user *buff, size_t c
     return count;
 }
 
-static irqreturn_t irq_handler(int irq, void *dev_id, struct pt_regs * regs)
+static irqreturn_t interrupt_handler(int irq, void *dev_id, struct pt_regs * regs)
 {
-    uint32_t buttons = read_register(gpio, GPIO_PC_DIN);
+    //Read the button status
+    uint32_t buttons = memread(gpio, GPIO_PC_DIN);
+
+    //Set the signal value to the reversed button value(Because they are active low)
     signal_info.si_int = ~buttons;
-	int ret = 0;
-	write_register(gpio, GPIO_IFC, 0xFFFF);
-	/* send the signal */
+
+    //Resets the interrupt
+	memwrite(gpio, GPIO_IFC, 0xFFFF);
+
+	//Checks if everything is up and running and sends the signal to the game.
     if(driver_enabled)
-        ret = send_sig_info(50, &signal_info, task);
-    if (ret < 0) {
-        printk("Cannot send signal...\n");
-        return ret;
+    {
+        int status = send_sig_info(50, &signal_info, task);
+        if (status < 0) 
+        {
+            printk("Unable to send interrupt\n");
+            return -1;
+        }       
+    }
+    else
+    {
+        printk("Driver not enabled\n");
+        return -1
     }
 
 	return IRQ_HANDLED;
