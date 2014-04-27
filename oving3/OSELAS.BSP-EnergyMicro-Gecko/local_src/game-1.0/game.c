@@ -70,8 +70,7 @@ int main(int argc, char *argv[])
 }
 
 void interrupt_handler(int n, siginfo_t *info, void *unused) {
-	printf("Interrupt!\n");
-	buttons = (uint8_t) ~(info->si_int);
+	uint8_t buttons = (uint8_t) ~(info->si_int);
 
     //Propagate the event here. [0 4] Up, down, left, right, click
     tictactoe_event(buttons);
