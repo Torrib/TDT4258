@@ -112,10 +112,15 @@ int main(int argc, char *argv[])
     struct sigaction sign;
     sign.sa_sigaction = interrupt_handler;
     sign.sa_flags = SA_SIGINFO;
-    sigaction(42, &sign, NULL);
+    sigaction(50, &sign, NULL);
 
     sprintf(pid_buf, "%d", getpid());
     write(gamepad, pid_buf, strlen(pid_buf) +1);
+
+    while(1)
+    {
+        
+    }
 
     // The game begins!
     init_tictactoe();
@@ -145,8 +150,8 @@ void drawGame(char board[][3])
     for(int i = 0; i < 100; i++)
         for(int y = 0; y <250; y++)
 		{
-			draw(i, y, 100);
-			//screen[i * 320 + y] = 0xffff;
+			//draw(i, y, 100);
+			screen[i * 320 + y] = 0xffff;
 		}
 
     for(int y = 0; y < 3; y++)
