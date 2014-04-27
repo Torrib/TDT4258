@@ -18,7 +18,7 @@ int moveAllowed(char[][3], int *column,int *row);
  * The main init code for tictactoe.
  *
  */
-int init_tictactoe()
+int init_tictactoe(int framebuffer)
 {
 
 	printf("Game initializing");
