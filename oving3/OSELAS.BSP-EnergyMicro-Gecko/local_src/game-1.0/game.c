@@ -11,7 +11,7 @@
 #include <string.h>
 #include <signal.h>
 
-#include <tictactoe.h>
+#include "tictactoe.h"
 
 int framebuffer;
 int gamepad;
@@ -74,7 +74,7 @@ void interrupt_handler(int n, siginfo_t *info, void *unused) {
 	//buttons = (uint8_t) ~(info->si_int);
 
     //Propagate the event here. [0 4] Up, down, left, right, click
-    tictactoe_event(0);
+    //tictactoe_event(0);
 }
 
 void game_stuff(void)
