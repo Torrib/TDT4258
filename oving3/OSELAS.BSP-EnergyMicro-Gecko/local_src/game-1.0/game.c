@@ -18,8 +18,8 @@
 #include "circle.h"
 
 #define BACKGROUND 0x0000
-#define FOREGROUND 0x3333
-#define HIGHLIGHT 0x7777
+#define FOREGROUND 0x7777
+#define HIGHLIGHT 0x3333
 
 int framebuffer;
 int gamepad;
@@ -145,7 +145,6 @@ void drawGame()
 
 void drawLocation(int y, int x)
 {
-	printf("x=%d y=%d type=%dx xx=%d yy=%d\n", y, x, board[y][x], posX, posY);
 	bool marker = false;
 
 	//Offset for our working area
@@ -276,6 +275,7 @@ void select_frame()
 {
     board[posX][posY] = active_player;
 
+    drawLocation(posX, posY);
     if(hasWon() == 1)
     {
         printf("Player %d won!\n", active_player);
@@ -337,34 +337,33 @@ void tictactoe_event(uint8_t event)
     if(event == 1)
     {
         newx--;
-        printf("Left\n");
     }
     else if(event == 2)
     {
         newy--;
-        printf("Up\n");
     }
     else if(event == 4)
     {
         newx++;
-        printf("Right\n");
     }
     else if(event == 8)
     {
         newy++;
-        printf("Down\n");
     }
     else if(event == 128)
     {
         if(frame_available() == 1)
             select_frame();
-        printf("Action\n");
+        else
+            printf("Square taken\n");
     }
 
     if(newy != posY || newx != posX)
     {
         if(check_move(newx, newy) == 1)
     		move(newx, newy);
+        else
+            printf("Illegal move\n")
     }
 
 }
