@@ -57,20 +57,20 @@ int main(int argc, char *argv[])
 	sprintf(pid_buf, "%d", getpid());
 	write(gamepad, pid_buf, strlen(pid_buf) +1);
 
+    // The game begins!
+    init_tictactoe();
+
 	while(1)
 	{
 
 	}
 
 	//game_stuff();
-
-    // The game begins!
-    init_tictactoe();
 }
 
 void interrupt_handler(int n, siginfo_t *info, void *unused) {
 	uint8_t buttons = (uint8_t) ~(info->si_int);
 
     //Propagate the event here. [0 4] Up, down, left, right, click
-    tictactoe_event(buttons);
+//	tictactoe_event(buttons);
 }

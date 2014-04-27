@@ -20,6 +20,8 @@ int moveAllowed(char[][3], int *column,int *row);
  */
 int init_tictactoe()
 {
+
+	printf("Game initializing");
     //Interaction with the user (From the driver) Use the FILE pointer?
 
     //hasTurn is 1 when it is player 1, and 2 when it is player two
