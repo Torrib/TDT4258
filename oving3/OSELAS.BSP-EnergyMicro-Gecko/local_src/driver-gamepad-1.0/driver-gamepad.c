@@ -31,7 +31,7 @@ typedef unsigned int uint32_t;
 static int __init my_driver_init(void);
 static void __exit my_driver_exit(void);
 static void write_register(void *base, uint32_t offset, uint32_t value);
-static uint32_t read_register(uint32_t offset);
+static uint32_t read_register(void *base, uint32_t offset);
 static int driver_open(struct inode *inode, struct file *filep);
 static int driver_release(struct inode *inode, struct file *filep);
 static ssize_t driver_read(struct file *filep, char __user *buff, size_t count, loff_t *offp);
