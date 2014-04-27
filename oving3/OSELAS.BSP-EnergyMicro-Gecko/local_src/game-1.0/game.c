@@ -30,7 +30,7 @@ uint16_t *screen;
 //TICTACTOE
 
 // Prototypes for tictac toe
-void init_tictactoe();
+int init_tictactoe();
 int hasWon();
 int check_move(int x, int y);
 void move(int x, int y);
@@ -230,23 +230,23 @@ void interrupt_handler(int n, siginfo_t *info, void *unused)
     int newy = posY;
 
     //Checks the button pressed values
-    if(event == 1)
+    if(buttons == 1)
     {
         newx--;
     }
-    else if(event == 2)
+    else if(buttons == 2)
     {
         newy--;
     }
-    else if(event == 4)
+    else if(buttons == 4)
     {
         newx++;
     }
-    else if(event == 8)
+    else if(buttons == 8)
     {
         newy++;
     }
-    else if(event == 128)
+    else if(buttons == 128)
     {
         //Checks if the square is taken, if it is free the player will pick it
         if(board[posX][posY] == 0)
