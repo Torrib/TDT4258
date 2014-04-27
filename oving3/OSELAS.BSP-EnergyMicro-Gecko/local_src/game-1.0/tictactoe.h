@@ -2,4 +2,4 @@
 int init_tictactoe();
 
 /** Propagates an event to the game */
-void tictactoe_event(int event);
+void tictactoe_event(uint8_t event);
