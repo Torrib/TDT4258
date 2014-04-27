@@ -276,5 +276,30 @@ void printBoard(char board[][3]){
 
 void tictactoe_event(uint8_t event)
 {
-    printf("%i\n", event);
+    if(event == 1)
+    {
+        //Left
+        printf("Left\n");
+    }
+    else if(event == 2)
+    {
+        //Up
+        printf("Up\n");
+    }
+    else if(event == 4)
+    {
+        //Right
+        printf("Right\n");
+    }
+    else if(event == 8)
+    {
+        //Down
+        printf("Down\n");
+    }
+    else if(event == 128)
+    {
+        //Action
+        printf("Action\n");
+    }
+    
 }
