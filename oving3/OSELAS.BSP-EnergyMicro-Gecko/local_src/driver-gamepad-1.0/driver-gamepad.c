@@ -74,22 +74,22 @@ static int __init my_driver_init(void)
 
     //Set up GPIO
 
-    write_register(*gpio, GPIO_PA_CTRL, 0x2);
+    write_register(gpio, GPIO_PA_CTRL, 0x2);
     //Set pins A8-15 to output
-    write_register(*gpio, GPIO_PA_MODEH, 0x55555555);
+    write_register(gpio, GPIO_PA_MODEH, 0x55555555);
     //write_register(GPIO_PA_DOUT, 0xFF00);
     //write_register(GPIO_PC_MODEL, 0x33333333);
    //write_register(GPIO_PC_DOUT, 0xFF);
 
     //Enable interrupt generation
-    write_register(*gpio, GPIO_IEN, 0xFF);
-    write_register(*gpio, GPIO_EXTIPSELL, 0x22222222);
+    write_register(gpio, GPIO_IEN, 0xFF);
+    write_register(gpio, GPIO_EXTIPSELL, 0x22222222);
 
     //Trigger interrupt on button press
-    write_register(*gpio, GPIO_EXTIFALL, 0xFF);
+    write_register(gpio, GPIO_EXTIFALL, 0xFF);
 
     //Clear interrupts
-    write_register(*gpio, GPIO_IFC, 0xFFFF);
+    write_register(gpio, GPIO_IFC, 0xFFFF);
 
     //Enable interruption generation
     request_irq(17, irq_handler, 0, NAME, NULL);
