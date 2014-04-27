@@ -35,8 +35,6 @@ int hasWon();
 int check_move(int x, int y);
 void move(int x, int y);
 int frame_available();
-int init_tictactoe();
-void drawGame();
 void drawLocation();
 void select_frame();
 
@@ -60,7 +58,7 @@ long int framebuffer_size;
 
 int main(int argc, char *argv[])
 {
-    printf("Starting game\n");
+    printf("Setup starting\n");
 
     //Open the framebuffer file
     framebuffer = open("/dev/fb0", O_RDWR);
@@ -81,12 +79,13 @@ int main(int argc, char *argv[])
     }
 
     //Gets dynamic information about the framebuffer (?)
-    // if(ioctl(framebuffer, FBIOGET_VSCREENINFO, &vinfo))
-    // {
-    //     printf("Error reading variable framebuffer info\n");
-    //     return 1;
-    // }
+    if(ioctl(framebuffer, FBIOGET_FSCREENINFO, &finfo))
+    {
+         printf("Error reading variable framebuffer info\n");
+         return 1;
+    }
 
+    //Open the gamepad driver and exit if an error occurs
     gamepad = open("/dev/gamepad", O_RDWR);
     if(gamepad < 0)
     {
@@ -94,9 +93,10 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    //Calculates the framebuffer size based on the screens resolution and pixelsize
     framebuffer_size = vinfo.xres * vinfo.yres * vinfo.bits_per_pixel / 8;
 
-    //Initiate the screen
+    //Memory map the screen and framebuffer
     screen = (uint16_t *) mmap(NULL, framebuffer_size, PROT_READ | PROT_WRITE, MAP_SHARED, framebuffer, 0);
 
     if(*screen == -1)
@@ -110,35 +110,42 @@ int main(int argc, char *argv[])
     sign.sa_sigaction = interrupt_handler;
     sign.sa_flags = SA_SIGINFO;
     sigaction(50, &sign, NULL);
-
     char pid_array[5];
     sprintf(pid_array, "%d", getpid());
     write(gamepad, pid_array, strlen(pid_array) +1);
 
+    //Clear the entire screen
     memset(screen, BACKGROUND, framebuffer_size);
-	//Setup the draw area
     rect.dx = 0;
     rect.dy = 0;
     rect.width = 320;
     rect.height = 240;
     ioctl(framebuffer, 0x4680, &rect);
 
-    // The game begins!
+    //Starts the game
     init_tictactoe();
 
     return 0;
 }
 
-void drawGame()
+
+int init_tictactoe()
 {
-    //Draw all the squares
-    for(int y = 0; y < 3; y++)
-        for(int x = 0; x < 3; x++)
-			drawLocation(y, x);
+    printf("Game Starting!\n");
 
+    //Initiates the board array
+    for (int x = 0; x < 3; x++) 
+    {
+        for (int y = 0; y < 3; y++) 
+        {
+            board[x][y] = 0;
+            drawLocation(y, x);
+        }
+    }
 
-    //Command driver to update display
-    //ioctl(framebuffer, 0x4680, &rect);
+    while (running == 1) {}
+
+    return 0;
 }
 
 void drawLocation(int y, int x)
@@ -221,22 +228,6 @@ void interrupt_handler(int n, siginfo_t *info, void *unused) {
     tictactoe_event(buttons);
 }
 
-
-/*
- * The main init code for tictactoe.
- *
- */
-int init_tictactoe()
-{
-    printf("Game initializing\n");
-
-    initialize_board();
-
-    while (running == 1) {}
-
-    return 0;
-}
-
 int check_move(int x, int y)
 {
     if(x > 2 || x < 0 || y > 2 || y < 0)
@@ -310,18 +301,6 @@ int hasWon()
     
     
     return 0;
-}
-
-void initialize_board(){
-    for (int x = 0; x < 3; x++) 
-    {
-        for (int y = 0; y < 3; y++) 
-        {
-            board[x][y] = 0;
-        }
-    }
-	
-	drawGame();
 }
 
 void tictactoe_event(uint8_t event)
