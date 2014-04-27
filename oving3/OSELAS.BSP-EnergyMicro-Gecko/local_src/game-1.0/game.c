@@ -19,7 +19,6 @@
 #include <string.h>
 #include <signal.h>
 
-#include "tictactoe.h"
 
 int framebuffer;
 int gamepad;
