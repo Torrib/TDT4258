@@ -108,14 +108,11 @@ void map(uint16_t **region, int fd)
 void draw(int x, int y, uint16_t color)
 {
     // Find memory location for x and y pos
-    long int location = (x + vinfo.xoffset) * (vinfo.bits_per_pixel/8)
-        + (y + vinfo.yoffset) * finfo.line_length;
 
 	//printf("Performing draw.\nvinfo.xoffset=%d\nvinfo.yoffset=%d\nvinfo.bits_per_pixel=%d\nfinfo.line_length=%d\n",
 	//	vinfo.xoffset, vinfo.yoffset, vinfo.bits_per_pixel, finfo.line_length);
 
 	//Draw at the location
-    *(screen + location) = 0xffff;
     //*(screen + location + 1) = 20;
     //*(screen + location + 2) = 200;
     //*(screen + location) = 0;
