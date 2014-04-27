@@ -67,18 +67,18 @@ int main(int argc, char *argv[])
     }
 
 
-	/* get fixed info*/
-	if(ioctl(framebuffer, FBIOGET_VSCREENINFO, &vinfo))
-	{
-		printf("Error reading fixed framebuffer info\n");
-		return 1;
-	}
+    /* get fixed info*/
+    if(ioctl(framebuffer, FBIOGET_VSCREENINFO, &vinfo))
+    {
+        printf("Error reading fixed framebuffer info\n");
+        return 1;
+    }
 
-	if(ioctl(framebuffer, FBIOGET_VSCREENINFO, &vinfo))
-	{
-		printf("Error reading variable framebuffer info\n");
-		return 1;
-	}
+    if(ioctl(framebuffer, FBIOGET_VSCREENINFO, &vinfo))
+    {
+        printf("Error reading variable framebuffer info\n");
+        return 1;
+    }
 
     gamepad = open("/dev/gamepad", O_RDWR);
     if(gamepad < 0)
@@ -87,28 +87,28 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-	//Setup the draw area
-	rect.dx = 0;
-	rect.dy = 0;
-	rect.width = 320;
-	rect.height = 240;
+    //Setup the draw area
+    rect.dx = 0;
+    rect.dy = 0;
+    rect.width = 320;
+    rect.height = 240;
 
-	framebuffer_size = vinfo.xres * vinfo.yres * vinfo.bits_per_pixel / 8;
+    framebuffer_size = vinfo.xres * vinfo.yres * vinfo.bits_per_pixel / 8;
 
     //Initiate the screen
     screen = (uint16_t *) mmap(NULL, framebuffer_size, PROT_READ | PROT_WRITE, MAP_SHARED, framebuffer, 0);
 
     if(*screen == -1)
-	{
-		printf("Error: Mapping memory failed with code %"PRIu16"\n", screen);
+    {
+        printf("Error: Mapping memory failed with code %"PRIu16"\n", screen);
         return 1;
-	}
+    }
 
-	printf("Framebuffer size: %ld\nFramebuffer address: %"PRIu16"\n", framebuffer_size, screen);
-	printf("vinfo.xoffset=%d\nvinfo.yoffset=%d\nvinfo.bits_per_pixel=%d\nfinfo.line_length=%d\n",
-		vinfo.xoffset, vinfo.yoffset, vinfo.bits_per_pixel, finfo.line_length);
+    printf("Framebuffer size: %ld\nFramebuffer address: %"PRIu16"\n", framebuffer_size, screen);
+    printf("vinfo.xoffset=%d\nvinfo.yoffset=%d\nvinfo.bits_per_pixel=%d\nfinfo.line_length=%d\n",
+        vinfo.xoffset, vinfo.yoffset, vinfo.bits_per_pixel, finfo.line_length);
 
-	// Setup signal handling
+    // Setup signal handling
     struct sigaction sign;
     sign.sa_sigaction = interrupt_handler;
     sign.sa_flags = SA_SIGINFO;
@@ -117,15 +117,12 @@ int main(int argc, char *argv[])
     sprintf(pid_buf, "%d", getpid());
     write(gamepad, pid_buf, strlen(pid_buf) +1);
 
-    while(1)
-    {
-        
-    }
-
     // The game begins!
     init_tictactoe();
 
-	return 0;
+    while(1){}
+
+    return 0;
 }
 
 void draw(int x, int y, uint16_t color)
@@ -134,7 +131,7 @@ void draw(int x, int y, uint16_t color)
     long int location = (x + vinfo.xoffset) * (vinfo.bits_per_pixel/8)
         + (y + vinfo.yoffset);// * finfo.line_length;
 
-	//Draw at the location
+    //Draw at the location
     *(screen + location) = 0xffff;
     //*(screen + location + 1) = 20;
     //*(screen + location + 2) = 200;
@@ -143,16 +140,16 @@ void draw(int x, int y, uint16_t color)
 
 void drawGame(char board[][3])
 {
-	//Empty the memory
-	memset(screen, 0x0000, framebuffer_size);
+    //Empty the memory
+    memset(screen, 0x0000, framebuffer_size);
 
-	/* Draw the board using the draw method*/
+    /* Draw the board using the draw method*/
     for(int i = 0; i < 100; i++)
         for(int y = 0; y <250; y++)
-		{
-			//draw(i, y, 100);
-			screen[i * 320 + y] = 0xffff;
-		}
+        {
+            //draw(i, y, 100);
+            screen[i * 320 + y] = 0xffff;
+        }
 
     for(int y = 0; y < 3; y++)
         for(int x = 0; x < 3; x++)
@@ -175,8 +172,8 @@ void drawGame(char board[][3])
             else if (board[y][x] == 'Y'){}
         }
 
-	//Command driver to update display
-	ioctl(framebuffer, 0x4680, &rect);
+    //Command driver to update display
+    ioctl(framebuffer, 0x4680, &rect);
 }
 
 void interrupt_handler(int n, siginfo_t *info, void *unused) {
@@ -203,7 +200,7 @@ int init_tictactoe()
 
     initializeBoard(board);
 
-	drawGame(board);
+    drawGame(board);
 
     while (play == 1) {
         while (hasTurn == 1) {
@@ -230,7 +227,7 @@ int init_tictactoe()
                 hasTurn = 2;
         }
 
-		drawGame(board);
+        drawGame(board);
 
         //Do the same for player two - is there a way to do this without the loops?
 
@@ -257,7 +254,7 @@ int init_tictactoe()
 
         }
 
-		drawGame(board);
+        drawGame(board);
     }
 
     return 0;
