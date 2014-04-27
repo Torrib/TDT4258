@@ -144,8 +144,7 @@ int init_tictactoe()
     //Run while the game has not finished
     while (running == 1) 
     {
-        sleep(1);
-
+        sleep(1000);
     }
 
     return 0;
