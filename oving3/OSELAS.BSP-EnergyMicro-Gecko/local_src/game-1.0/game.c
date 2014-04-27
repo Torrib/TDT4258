@@ -31,12 +31,8 @@ void initializeBoard(char[][3]);
 void printBoard(char[][3]);
 int hasWon(char[][3], int hasTurn);
 int moveAllowed(char[][3], int *column,int *row);
-
-//Variables
-int fb;
-int s;
-
 static void interrupt_handler(int, siginfo_t*, void*);
+void init_tictactoe();
 
 int main(int argc, char *argv[])
 {
@@ -77,7 +73,7 @@ int main(int argc, char *argv[])
 	write(gamepad, pid_buf, strlen(pid_buf) +1);
     
     // The game begins!
-    init_tictactoe(framebuffer);
+    init_tictactoe(;
     
 	while(1)
 	{
@@ -91,7 +87,7 @@ void interrupt_handler(int n, siginfo_t *info, void *unused) {
 	uint8_t buttons = (uint8_t) ~(info->si_int);
     
     //Propagate the event here. [0 4] Up, down, left, right, click
-    //	tictactoe_event(buttons);
+    tictactoe_event(buttons);
 }
 
 
@@ -99,7 +95,7 @@ void interrupt_handler(int n, siginfo_t *info, void *unused) {
  * The main init code for tictactoe.
  *
  */
-int init_tictactoe(int framebuffer)
+int init_tictactoe()
 {
     
 	printf("Game initializing");
@@ -109,7 +105,6 @@ int init_tictactoe(int framebuffer)
     int play = 1;
     int column, row;
     char board[3][3];
-    fb = framebuffer;
     
     initializeBoard(board);
     
@@ -236,7 +231,7 @@ void printBoard(char board[][3]){
     }
 }
 
-void tictactoe_event(uint8_t event)
+void tictactoe_event(int event)
 {
     printf(event);
 }
