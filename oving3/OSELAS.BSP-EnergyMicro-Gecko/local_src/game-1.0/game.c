@@ -31,7 +31,8 @@ void printBoard(char[][3]);
 int hasWon(char[][3], int hasTurn);
 int moveAllowed(char[][3], int *column,int *row);
 static void interrupt_handler(int, siginfo_t*, void*);
-void init_tictactoe();
+int init_tictactoe();
+void tictactoe_event(int event);
 
 int main(int argc, char *argv[])
 {
