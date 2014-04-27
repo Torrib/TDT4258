@@ -56,6 +56,8 @@ dev_t devicenumber = 0;
 void __iomem *gpio;
 char output;
 struct task_struct *task;
+struct siginfo info;
+uint8_t opened = 0;
 
 /** Class for userspace /dev/NAME file */
 struct class *cl;
@@ -85,6 +87,10 @@ static int __init my_driver_init(void)
 
     request_irq(17, irq_handler, 0, NAME, NULL);
     request_irq(18, irq_handler, 0, NAME, NULL);
+
+    memset(&info, 0, sizeof(struct siginfo));
+    info.si_signo = 42;
+    info.si_code = SI_QUEUE;
 
     /* Make the userpace driver file. */
     //Create file based on driver name
@@ -131,12 +137,17 @@ uint32_t read_register(uint32_t offset)
 
 static int driver_open(struct inode *inode, struct file *filp)
 {
+    if(opened == 0) {
+        opened++;
+        return 0;
+    }
     printk(KERN_INFO "%s opened\n", NAME);
     return 0;
 }
 
 static int driver_release(struct inode *inode, struct file *filp)
 {
+    opened--;
     printk(KERN_INFO "%s closed\n", NAME);
     return 0;
 }
@@ -171,27 +182,18 @@ static ssize_t driver_write(struct file *filp, const char __user *buff, size_t c
     return count;
 }
 
-uint8_t opened = 0;
-
 static irqreturn_t irq_handler(int irq, void *dev_id, struct pt_regs * regs)
 {
-	printf("Interrupt triggered!");
     uint32_t buttons = read_register(GPIO_PC_DIN);
-	struct siginfo info;
 	int ret = 0;
 	write_register(GPIO_IFC, 0xFFFF);
 	/* send the signal */
-	memset(&info, 0, sizeof(struct siginfo));
-	info.si_signo = 42;
-	info.si_code = SI_QUEUE;	
-	info.si_int = buttons;
-	if(opened)
-		ret = send_sig_info(42, &info, task);
-	if (ret < 0) {
-		printk("error sending signal\n");
-		return ret;
-	}
-
+    if(opened)
+        ret = send_sig_info(42, &info, task);
+    if (ret < 0) {
+        printk("Cannot send signal...\n");
+        return ret;
+    }
 
 	return IRQ_HANDLED;
 }

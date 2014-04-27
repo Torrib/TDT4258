@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
 	sigaction(42, &sign, NULL);
 
 	sprintf(pid_buf, "%d", getpid());
-	write(gamepad, pid_buf, strlen(pid_buf)
+	write(gamepad, pid_buf, strlen(pid_buf) +1);
 
 	while(1)
 	{
