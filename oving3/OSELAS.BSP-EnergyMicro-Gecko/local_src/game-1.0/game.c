@@ -45,7 +45,7 @@ struct fb_fix_screeninfo finfo;
 
 struct fb_copyarea rect;
 
-uint16_t framebuffer_size;
+long int framebuffer_size;
 
 int main(int argc, char *argv[])
 {
@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
     //Initiate the screen
     screen = (uint16_t *) mmap(NULL, framebuffer_size, PROT_READ | PROT_WRITE, MAP_SHARED, framebuffer, 0);
 
-    if(*screen == -1)
+    if(screen == -1)
 	{
 		printf("Error: Mapping memory failed with code %d \n", screen);
         return 1;
@@ -124,7 +124,7 @@ void draw(int x, int y, uint16_t color)
 {
     // Find memory location for x and y pos
     long int location = (x + vinfo.xoffset) * (vinfo.bits_per_pixel/8)
-        + (y + vinfo.yoffset) * finfo.line_length;
+        + (y + vinfo.yoffset);// * finfo.line_length;
 
 	//Draw at the location
     *(screen + location) = 0xffff;
