@@ -4,3 +4,5 @@
 *.elf
 *.xcodeproj
 *.DS_Store
+*.out
+*.gch

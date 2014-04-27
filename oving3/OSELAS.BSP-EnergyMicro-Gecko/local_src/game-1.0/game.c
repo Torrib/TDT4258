@@ -13,7 +13,9 @@
 #include <linux/fb.h>
 #include <inttypes.h>
 
+
 #include "cross.h"
+#include "circle.h"
 
 int framebuffer;
 int gamepad;
@@ -125,34 +127,52 @@ void drawGame(char board[][3])
 {
     //Empty the memory
     memset(screen, 0x0000, framebuffer_size);
-
-    /* Draw the board using the draw method*/
-    for(int i = 0; i < 100; i++)
+	/* Draw the board using the draw method*/
+    /*for(int x = 0; x < 150; x++)
         for(int y = 0; y <250; y++)
-        {
-            //draw(i, y, 100);
-            screen[i * 320 + y] = 0xffff;
-        }
-
+		{
+			//draw(i, y, 100);
+			screen[x * 320 + y] = 0xffff;
+		}*/
+	board[0][1] = 'X';
+	board[2][2] = 'O';
     for(int y = 0; y < 3; y++)
         for(int x = 0; x < 3; x++)
         {
             if(board[y][x] ==  'X')
             {
-                //Offset for line
-                int xOffset = 10*x + 100*x;
-                int yOffset = 10*y + 74*y;
+				//Offset for line
+				int xOffset = 10*x + 100*x;
+				int yOffset = 10*y + 74*y;
 
-                for(int yy = 0; yy < cross_image.height; yy++)
-                    for(int xx = 0; xx < cross_image.width; xx++)
-                    {
-                        uint16_t color = cross_image.pixel_data[cross_image.width * yy + xx * cross_image.bytes_per_pixel];
+				for(int yy = 0; yy < image_cross.height; yy++)
+					for(int xx = 0; xx < image_cross.width; xx++)
+					{
+						long int pos = (image_cross.width * yy + xx) * image_cross.bytes_per_pixel;
+						uint16_t color = image_cross.pixel_data[pos];
 
-                        screen[xOffset * 320 + yOffset] = color;
-                    }
+						//printf("%d %d %d\n", xx, yy, color);
+						screen[((yOffset + yy) * 320) + xOffset + xx] = color;
+					}
 
             }
-            else if (board[y][x] == 'Y'){}
+            else if (board[y][x] == 'O'){
+				//Offset for line
+				int xOffset = 10*x + 100*x;
+				int yOffset = 10*y + 74*y;
+
+				for(int yy = 0; yy < image_circle.height; yy++)
+					for(int xx = 0; xx < image_circle.width; xx++)
+					{
+						long int pos = (image_circle.width * yy + xx) * image_circle.bytes_per_pixel;
+						uint16_t color = image_circle.pixel_data[pos];
+
+						//printf("%d %d %d\n", xx, yy, color);
+						screen[((yOffset + yy) * 320) + xOffset + xx] = color;
+					}
+
+
+			}
         }
 
     //Command driver to update display
@@ -176,6 +196,7 @@ int init_tictactoe()
     printf("Game initializing");
 
     int play = 1;
+<<<<<<< HEAD
     initialize_board();
 
     //drawGame(board);
@@ -183,6 +204,39 @@ int init_tictactoe()
     while (play == 1) 
     {
         //TODO indikate active square
+=======
+    int column, row;
+    char board[3][3];
+
+    initializeBoard(board);
+
+    while (play == 1) {
+        while (hasTurn == 1) {
+            printBoard(board);
+            printf("Player 1 - Choose column 0 - 2 :\n");
+            scanf("%d", &column);
+            printf("Player 1 - Choose row 0 - 2 :\n");
+            scanf("%d", &row);
+
+            //Check if the column and row is allowed
+            //Should be in a method
+
+            if(moveAllowed(board, &column, &row) == 1)
+                board[column][row] = 'X';
+            else
+                printf("Column or row not valid - try again.\n");
+
+            //Check if player 1 won
+            if (hasWon(board,hasTurn) == 1){
+                printf("%s", "Player 1 won!");
+                play = 0;
+            }
+            else
+                hasTurn = 2;
+        }
+
+        //Do the same for player two - is there a way to do this without the loops?
+>>>>>>> 85b3a092ea7b1657d9338515b6d33b9520be9970
 
     }
 
@@ -266,6 +320,8 @@ void initialize_board(){
             board[x][y] = 0;
         }
     }
+	
+	drawGame(board);
 }
 
 void tictactoe_event(uint8_t event)
