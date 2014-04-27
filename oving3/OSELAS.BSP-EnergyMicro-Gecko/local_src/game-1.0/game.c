@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <signal.h>
+#include <linux/fb.h>
 
 int framebuffer;
 int gamepad;
@@ -35,6 +36,10 @@ void tictactoe_event(uint8_t event);
 //protos for drawing
 void draw(int x, int y, uint16_t color);
 
+//Consts for drawing
+struct fb_var_screeninfo vinfo;
+struct fb_fix_screeninfo finfo;
+
 int main(int argc, char *argv[])
 {
     printf("Starting game\n");
@@ -50,6 +55,20 @@ int main(int argc, char *argv[])
         printf("Error opening frame buffer\n");
         return 1;
     }
+
+
+	/* get fixed info*/
+	if(ioctl(framebuffer, FBIOGET_VSCREENINFO, &vinfo))
+	{
+		printf("Error reading fixed framebuffer info");
+		return 1;
+	}
+
+	if(ioctl(framebuffer, FBIOGET_VSCREENINFO, &vinfo))
+	{
+		printf("Error reading variable framebuffer info");
+		return 1;
+	}
 
     gamepad = open("/dev/gamepad", O_RDWR);
     if(gamepad < 0)
@@ -87,8 +106,8 @@ int main(int argc, char *argv[])
 void draw(int x, int y, uint16_t color)
 {
     // Find memory location for x and y pos
-    long int location = (x + 0) * 2
-        + (y + 0) * 2;
+    long int location = (x + vinfo.xoffset) * (vinfo.bits_per_pixel/8)
+        + (y + vinfo.xoffset) * finfo.line_length;
 
 	//Draw at the location
     *(screen + location) = color;
@@ -108,7 +127,6 @@ void interrupt_handler(int n, siginfo_t *info, void *unused) {
  */
 int init_tictactoe()
 {
-
     printf("Game initializing");
 
     //hasTurn is 1 when it is player 1, and 2 when it is player two
