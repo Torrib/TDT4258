@@ -115,8 +115,6 @@ static int __init my_driver_init(void)
     memwrite(EMU_CTRL, 0, 0);
     memwrite(SCR, 0, 4);
 
-    __asm("wfi");
-
     printk(KERN_INFO "Gamepad driver started");
 
     return 0;

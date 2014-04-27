@@ -123,6 +123,8 @@ int main(int argc, char *argv[])
     //Starts the game
     init_tictactoe();
 
+      __asm("wfi");
+
     return 0;
 }
 
@@ -142,10 +144,10 @@ int init_tictactoe()
     }
 
     //Run while the game has not finished
-    while (running == 1) 
-    {
-        sleep(1000);
-    }
+    // while (running == 1) 
+    // {
+    //     sleep(1000);
+    // }
 
     return 0;
 }
