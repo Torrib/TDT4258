@@ -12,7 +12,7 @@
 #include <linux/types.h>
 #include <linux/rcupdate.h>
 #include <linux/sched.h>
-#include <linux/semaphore.h>
+//#include <linux/semaphore.h>
 #include <linux/device.h>
 
 #include <asm/io.h>
@@ -54,7 +54,7 @@ void __iomem *gpio;
 char output;
 struct task_struct *task;
 struct siginfo signal_info;
-struct semaphore sem;
+//struct semaphore sem;
 uint8_t driver_enabled = 0;
 
 /** Class for userspace /dev/NAME file */
@@ -113,6 +113,8 @@ static int __init my_driver_init(void)
     cl = class_create(THIS_MODULE, NAME);
     device_create(cl, NULL, devicenumber, NULL, NAME);
 
+	//init_MUTEX(&sem);
+
     printk(KERN_INFO "Gamepad driver started");
 
     return 0;
@@ -152,12 +154,12 @@ uint32_t memread(void *base, uint32_t offset)
 
 static int driver_open(struct inode *inode, struct file *filp)
 {
-    printk(KERN_INFO "LOL");
     //if(down_interruptible(&sem) == 0) {
-    	printk(KERN_INFO "TROL");
-        driver_enabled = 1;
-        return 0;
-    //}
+	if(driver_enabled == 0)
+	{
+      driver_enabled = 1;
+      return 0;
+    }
 
     printk(KERN_ALERT "Unable to open gamepad driver");
     return -1;
