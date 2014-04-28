@@ -17,8 +17,6 @@
 #include "cross.h"
 #include "circle.h"
 
-#include "efm32gg.h"
-
 #define BACKGROUND 0x0000
 #define FOREGROUND 0x7777
 #define HIGHLIGHT 0x3333
