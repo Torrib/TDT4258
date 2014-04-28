@@ -121,13 +121,13 @@ int main(int argc, char *argv[])
     rect.height = 240;
     ioctl(framebuffer, 0x4680, &rect);
 
-    *EMU_CTRL = 0;
-    *SCR = 6;
+    //*EMU_CTRL = 0;
+    //*SCR = 6;
 
     //Starts the game
     init_tictactoe();
 
-    __asm("wfi");
+    //__asm("wfi");
 
     return 0;
 }
